@@ -84,7 +84,7 @@ export default function Login() {
             </Typography>
           </Box>
 
-          <Box component="form" onSubmit={handleSubmit}>
+          <Box component="form" method="post" action="#" onSubmit={handleSubmit}>
             {error && (
               <Alert severity="error" sx={{ mb: 2 }}>
                 {error}
