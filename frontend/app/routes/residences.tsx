@@ -405,17 +405,13 @@ export default function Residences() {
 
       <Container maxWidth="lg" sx={{ mt: { xs: 2, sm: 4 }, mb: 4, px: { xs: 2, sm: 3 } }}>
         {/* Search Bar */}
-        <Box
-          component="form"
-          onSubmit={handleSearch}
-          sx={{ mb: 3, display: 'flex', gap: 1 }}
-        >
+        <Box component="form" onSubmit={handleSearch} sx={{ mb: 3 }}>
           <TextField
             size="small"
             placeholder="Search by house #, name, or phone..."
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
-            sx={{ flex: 1, maxWidth: 400 }}
+            sx={{ width: '100%', maxWidth: 400 }}
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
@@ -431,9 +427,6 @@ export default function Residences() {
               ),
             }}
           />
-          <Button type="submit" variant="contained" size="small">
-            Search
-          </Button>
         </Box>
 
         {error && (
