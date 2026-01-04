@@ -5,7 +5,6 @@ import {
   Box,
   Button,
   Container,
-  Paper,
   TextField,
   Typography,
   CircularProgress,
@@ -43,95 +42,86 @@ export default function Login() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        bgcolor: 'grey.100',
+        bgcolor: 'background.default',
         px: { xs: 2, sm: 0 },
       }}
     >
-      <Container maxWidth="sm" disableGutters sx={{ width: '100%' }}>
-        <Paper
-          elevation={3}
+      <Container maxWidth="xs" disableGutters sx={{ width: '100%' }}>
+        <Box
           sx={{
-            p: { xs: 3, sm: 4 },
-            mx: { xs: 0, sm: 'auto' },
-            borderRadius: { xs: 2, sm: 1 },
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            mb: 3,
           }}
         >
           <Box
             sx={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              mb: 3,
+              bgcolor: 'primary.main',
+              borderRadius: '50%',
+              p: 1.5,
+              mb: 2,
             }}
           >
-            <Box
-              sx={{
-                bgcolor: 'primary.main',
-                borderRadius: '50%',
-                p: 1.5,
-                mb: 2,
-              }}
-            >
-              <LockOutlined sx={{ color: 'white', fontSize: { xs: 24, sm: 28 } }} />
-            </Box>
-            <Typography
-              component="h1"
-              variant="h5"
-              fontWeight="bold"
-              sx={{ fontSize: { xs: '1.25rem', sm: '1.5rem' } }}
-            >
-              Residency Login
-            </Typography>
+            <LockOutlined sx={{ color: 'white', fontSize: { xs: 24, sm: 28 } }} />
           </Box>
+          <Typography
+            component="h1"
+            variant="h5"
+            fontWeight="bold"
+            sx={{ fontSize: { xs: '1.25rem', sm: '1.5rem' } }}
+          >
+            Residency Login
+          </Typography>
+        </Box>
 
-          <Box component="form" method="post" action="#" onSubmit={handleSubmit}>
-            {error && (
-              <Alert severity="error" sx={{ mb: 2 }}>
-                {error}
-              </Alert>
+        <Box component="form" method="post" action="#" onSubmit={handleSubmit}>
+          {error && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {error}
+            </Alert>
+          )}
+
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            id="email"
+            label="Email Address"
+            name="email"
+            autoComplete="email"
+            autoFocus
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            name="password"
+            label="Password"
+            type="password"
+            id="password"
+            autoComplete="current-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+
+          <Button
+            type="submit"
+            fullWidth
+            variant="contained"
+            disabled={isLoading}
+            sx={{ mt: 3, mb: 2, py: { xs: 1.25, sm: 1.5 } }}
+          >
+            {isLoading ? (
+              <CircularProgress size={24} color="inherit" />
+            ) : (
+              'Sign In'
             )}
-
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              id="email"
-              label="Email Address"
-              name="email"
-              autoComplete="email"
-              autoFocus
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              name="password"
-              label="Password"
-              type="password"
-              id="password"
-              autoComplete="current-password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              disabled={isLoading}
-              sx={{ mt: 3, mb: 2, py: { xs: 1.25, sm: 1.5 } }}
-            >
-              {isLoading ? (
-                <CircularProgress size={24} color="inherit" />
-              ) : (
-                'Sign In'
-              )}
-            </Button>
-          </Box>
-        </Paper>
+          </Button>
+        </Box>
       </Container>
     </Box>
   );
