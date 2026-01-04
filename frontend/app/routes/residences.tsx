@@ -6,7 +6,6 @@ import {
   Box,
   Button,
   Checkbox,
-  Chip,
   CircularProgress,
   Container,
   Dialog,
@@ -37,10 +36,8 @@ import {
   ArrowBack,
   Close,
   Delete,
-  Email,
   Home,
   Logout,
-  Phone,
 } from '@mui/icons-material';
 import { getStoredTokens, clearTokens } from '~/lib/auth';
 import {
@@ -413,100 +410,16 @@ export default function Residences() {
               </Button>
             )}
           </Box>
-        ) : isMobile ? (
-          /* Mobile List View */
-          <Box>
-            {residences.map((residence, index) => (
-              <Box key={residence.id}>
-                <Box
-                  onClick={() => handleOpenEditDialog(residence)}
-                  sx={{
-                    py: 2,
-                    cursor: 'pointer',
-                    '&:active': { bgcolor: 'grey.50' },
-                  }}
-                >
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                    <Box sx={{ flex: 1 }}>
-                      <Typography variant="subtitle1" fontWeight={500}>
-                        {residence.house_number}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        {residence.name}
-                      </Typography>
-
-                      {residence.phone_numbers.length > 0 && (
-                        <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', mt: 1.5 }}>
-                          {residence.phone_numbers.map((phone) => (
-                            <Chip
-                              key={phone.id}
-                              icon={<Phone />}
-                              label={phone.number}
-                              size="small"
-                              variant={phone.is_primary ? 'filled' : 'outlined'}
-                              color={phone.is_primary ? 'primary' : 'default'}
-                            />
-                          ))}
-                        </Box>
-                      )}
-
-                      {residence.email_addresses.length > 0 && (
-                        <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', mt: 1 }}>
-                          {residence.email_addresses.map((email) => (
-                            <Chip
-                              key={email.id}
-                              icon={<Email />}
-                              label={email.email}
-                              size="small"
-                              variant={email.is_primary ? 'filled' : 'outlined'}
-                              color={email.is_primary ? 'primary' : 'default'}
-                            />
-                          ))}
-                        </Box>
-                      )}
-                    </Box>
-
-                    {canDelete && (
-                      <IconButton
-                        size="small"
-                        color="error"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleOpenDeleteDialog(residence);
-                        }}
-                      >
-                        <Delete />
-                      </IconButton>
-                    )}
-                  </Box>
-                </Box>
-                {index < residences.length - 1 && <Divider />}
-              </Box>
-            ))}
-
-            {totalPages > 1 && (
-              <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
-                <Pagination
-                  count={totalPages}
-                  page={page}
-                  onChange={handlePageChange}
-                  color="primary"
-                  size="small"
-                />
-              </Box>
-            )}
-          </Box>
         ) : (
-          /* Desktop Table View */
           <>
-            <TableContainer>
-              <Table>
+            <TableContainer sx={{ overflowX: 'auto' }}>
+              <Table size="small" sx={{ minWidth: 600 }}>
                 <TableHead>
                   <TableRow>
-                    <TableCell>House Number</TableCell>
+                    <TableCell>House #</TableCell>
                     <TableCell>Name</TableCell>
-                    <TableCell>Phone Numbers</TableCell>
-                    <TableCell>Email Addresses</TableCell>
+                    <TableCell>Phones</TableCell>
+                    <TableCell>Emails</TableCell>
                     {canDelete && <TableCell align="right">Actions</TableCell>}
                   </TableRow>
                 </TableHead>
@@ -518,50 +431,24 @@ export default function Residences() {
                       onClick={() => handleOpenEditDialog(residence)}
                       sx={{ cursor: 'pointer' }}
                     >
-                      <TableCell>
-                        <Typography fontWeight="medium">{residence.house_number}</Typography>
+                      <TableCell sx={{ whiteSpace: 'nowrap' }}>
+                        {residence.house_number}
                       </TableCell>
-                      <TableCell>{residence.name}</TableCell>
-                      <TableCell>
-                        <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
-                          {residence.phone_numbers.map((phone) => (
-                            <Chip
-                              key={phone.id}
-                              icon={<Phone />}
-                              label={phone.number}
-                              size="small"
-                              variant={phone.is_primary ? 'filled' : 'outlined'}
-                              color={phone.is_primary ? 'primary' : 'default'}
-                            />
-                          ))}
-                          {residence.phone_numbers.length === 0 && (
-                            <Typography variant="body2" color="text.secondary">
-                              -
-                            </Typography>
-                          )}
-                        </Box>
+                      <TableCell sx={{ whiteSpace: 'nowrap' }}>
+                        {residence.name}
                       </TableCell>
-                      <TableCell>
-                        <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
-                          {residence.email_addresses.map((email) => (
-                            <Chip
-                              key={email.id}
-                              icon={<Email />}
-                              label={email.email}
-                              size="small"
-                              variant={email.is_primary ? 'filled' : 'outlined'}
-                              color={email.is_primary ? 'primary' : 'default'}
-                            />
-                          ))}
-                          {residence.email_addresses.length === 0 && (
-                            <Typography variant="body2" color="text.secondary">
-                              -
-                            </Typography>
-                          )}
-                        </Box>
+                      <TableCell sx={{ whiteSpace: 'nowrap' }}>
+                        {residence.phone_numbers.length > 0
+                          ? residence.phone_numbers.map((p) => p.number).join(', ')
+                          : ''}
+                      </TableCell>
+                      <TableCell sx={{ whiteSpace: 'nowrap' }}>
+                        {residence.email_addresses.length > 0
+                          ? residence.email_addresses.map((e) => e.email).join(', ')
+                          : ''}
                       </TableCell>
                       {canDelete && (
-                        <TableCell align="right">
+                        <TableCell align="right" sx={{ whiteSpace: 'nowrap' }}>
                           <Tooltip title="Delete">
                             <IconButton
                               size="small"
@@ -589,6 +476,7 @@ export default function Residences() {
                   page={page}
                   onChange={handlePageChange}
                   color="primary"
+                  size={isMobile ? 'small' : 'medium'}
                 />
               </Box>
             )}
