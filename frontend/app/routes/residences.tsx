@@ -15,6 +15,7 @@ import {
   DialogTitle,
   FormControlLabel,
   IconButton,
+  InputAdornment,
   Pagination,
   Snackbar,
   Table,
@@ -33,14 +34,17 @@ import {
 import {
   Add,
   ArrowBack,
+  Clear,
   Close,
   Delete,
   Home,
   Logout,
+  Search,
 } from '@mui/icons-material';
 import { getStoredTokens, clearTokens } from '~/lib/auth';
 import {
   getResidences,
+  searchResidences,
   createResidence,
   updateResidence,
   deleteResidence,
@@ -65,6 +69,8 @@ export default function Residences() {
   const [error, setError] = useState('');
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [search, setSearch] = useState('');
+  const [searchInput, setSearchInput] = useState('');
 
   // Form dialog state
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -121,13 +127,15 @@ export default function Residences() {
     if (user) {
       fetchResidences();
     }
-  }, [page, user]);
+  }, [page, search, user]);
 
   const fetchResidences = async () => {
     setLoading(true);
     setError('');
     try {
-      const data: PaginatedResponse<Residence> = await getResidences(page);
+      const data: PaginatedResponse<Residence> = search
+        ? await searchResidences(search, page)
+        : await getResidences(page);
       setResidences(data.results);
       setTotalPages(Math.ceil(data.count / 10));
     } catch (err) {
@@ -150,6 +158,18 @@ export default function Residences() {
 
   const handlePageChange = (_: React.ChangeEvent<unknown>, value: number) => {
     setPage(value);
+  };
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    setPage(1);
+    setSearch(searchInput);
+  };
+
+  const handleClearSearch = () => {
+    setSearchInput('');
+    setSearch('');
+    setPage(1);
   };
 
   const handleOpenCreateDialog = () => {
@@ -384,6 +404,38 @@ export default function Residences() {
       </AppBar>
 
       <Container maxWidth="lg" sx={{ mt: { xs: 2, sm: 4 }, mb: 4, px: { xs: 2, sm: 3 } }}>
+        {/* Search Bar */}
+        <Box
+          component="form"
+          onSubmit={handleSearch}
+          sx={{ mb: 3, display: 'flex', gap: 1 }}
+        >
+          <TextField
+            size="small"
+            placeholder="Search by house #, name, or phone..."
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            sx={{ flex: 1, maxWidth: 400 }}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Search color="action" fontSize="small" />
+                </InputAdornment>
+              ),
+              endAdornment: searchInput && (
+                <InputAdornment position="end">
+                  <IconButton size="small" onClick={handleClearSearch}>
+                    <Clear fontSize="small" />
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
+          />
+          <Button type="submit" variant="contained" size="small">
+            Search
+          </Button>
+        </Box>
+
         {error && (
           <Alert severity="error" sx={{ mb: 3 }}>
             {error}
@@ -398,12 +450,20 @@ export default function Residences() {
           <Box sx={{ textAlign: 'center', py: { xs: 6, sm: 10 } }}>
             <Home sx={{ fontSize: { xs: 48, sm: 64 }, color: 'grey.400', mb: 2 }} />
             <Typography variant="h6" color="text.secondary">
-              No residences found
+              {search ? 'No results found' : 'No residences found'}
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-              {canAdd ? 'Get started by adding your first residence' : 'No residences available'}
+              {search
+                ? 'Try a different search term'
+                : canAdd
+                ? 'Get started by adding your first residence'
+                : 'No residences available'}
             </Typography>
-            {canAdd && (
+            {search ? (
+              <Button variant="outlined" onClick={handleClearSearch}>
+                Clear Search
+              </Button>
+            ) : canAdd && (
               <Button variant="contained" startIcon={<Add />} onClick={handleOpenCreateDialog}>
                 Add Residence
               </Button>

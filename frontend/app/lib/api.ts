@@ -153,6 +153,13 @@ export async function getResidences(page = 1): Promise<PaginatedResponse<Residen
   return apiFetch<PaginatedResponse<Residence>>(`/residences/?page=${page}`);
 }
 
+export async function searchResidences(search: string, page = 1): Promise<PaginatedResponse<Residence>> {
+  return apiFetch<PaginatedResponse<Residence>>('/residences/search/', {
+    method: 'POST',
+    body: JSON.stringify({ search, page }),
+  });
+}
+
 export async function getResidence(id: number): Promise<Residence> {
   return apiFetch<Residence>(`/residences/${id}/`);
 }
