@@ -4,8 +4,6 @@ import {
   AppBar,
   Box,
   Button,
-  Card,
-  CardContent,
   CircularProgress,
   Container,
   IconButton,
@@ -50,7 +48,7 @@ export default function Home() {
   }
 
   return (
-    <Box sx={{ flexGrow: 1 }}>
+    <Box sx={{ flexGrow: 1, bgcolor: 'background.default', minHeight: '100vh' }}>
       <AppBar position="static">
         <Toolbar>
           <HomeIcon sx={{ mr: 2 }} />
@@ -65,68 +63,34 @@ export default function Home() {
         </Toolbar>
       </AppBar>
 
-      <Container maxWidth="md" sx={{ mt: { xs: 4, sm: 8 }, px: { xs: 2, sm: 3 } }}>
-        <Typography
-          variant="h4"
-          component="h1"
-          gutterBottom
-          textAlign="center"
-          sx={{ fontSize: { xs: '1.75rem', sm: '2.125rem' } }}
-        >
-          Welcome to Residency
-        </Typography>
-        <Typography
-          variant="body1"
-          color="text.secondary"
-          textAlign="center"
-          sx={{ mb: { xs: 4, sm: 6 } }}
-        >
-          Manage your residences, tenants, and property information
-        </Typography>
-
-        <Card
-          sx={{
-            cursor: 'pointer',
-            transition: 'transform 0.2s, box-shadow 0.2s',
-            '&:hover': {
-              transform: 'translateY(-4px)',
-              boxShadow: 4,
-            },
-          }}
-          onClick={() => navigate('/residences')}
-        >
-          <CardContent
-            sx={{
-              display: 'flex',
-              flexDirection: { xs: 'column', sm: 'row' },
-              alignItems: { xs: 'stretch', sm: 'center' },
-              justifyContent: 'space-between',
-              gap: 2,
-              p: { xs: 2, sm: 3 },
-            }}
+      <Container maxWidth="sm" sx={{ mt: { xs: 6, sm: 10 }, px: { xs: 2, sm: 3 } }}>
+        <Box sx={{ textAlign: 'center' }}>
+          <Typography
+            variant="h4"
+            component="h1"
+            gutterBottom
+            sx={{ fontSize: { xs: '1.75rem', sm: '2.125rem' }, fontWeight: 600 }}
           >
-            <Box sx={{ textAlign: { xs: 'center', sm: 'left' } }}>
-              <Typography variant="h6" component="h2">
-                Residency Management
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                View, add, edit, and manage residence information
-              </Typography>
-            </Box>
-            <Button
-              variant="contained"
-              endIcon={<NavigateNext />}
-              fullWidth={false}
-              sx={{ minWidth: { xs: '100%', sm: 'auto' } }}
-              onClick={(e) => {
-                e.stopPropagation();
-                navigate('/residences');
-              }}
-            >
-              Go to Residences
-            </Button>
-          </CardContent>
-        </Card>
+            Welcome to Residency
+          </Typography>
+          <Typography
+            variant="body1"
+            color="text.secondary"
+            sx={{ mb: { xs: 4, sm: 5 } }}
+          >
+            Manage your residences, tenants, and property information
+          </Typography>
+
+          <Button
+            variant="contained"
+            size="large"
+            endIcon={<NavigateNext />}
+            onClick={() => navigate('/residences')}
+            sx={{ py: 1.5, px: 4 }}
+          >
+            Go to Residences
+          </Button>
+        </Box>
       </Container>
     </Box>
   );

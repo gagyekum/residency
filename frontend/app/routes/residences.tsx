@@ -5,9 +5,6 @@ import {
   AppBar,
   Box,
   Button,
-  Card,
-  CardActions,
-  CardContent,
   Checkbox,
   Chip,
   CircularProgress,
@@ -21,7 +18,6 @@ import {
   FormControlLabel,
   IconButton,
   Pagination,
-  Paper,
   Snackbar,
   Table,
   TableBody,
@@ -350,7 +346,7 @@ export default function Residences() {
   };
 
   return (
-    <Box sx={{ flexGrow: 1 }}>
+    <Box sx={{ flexGrow: 1, bgcolor: 'background.default', minHeight: '100vh' }}>
       <AppBar position="static">
         <Toolbar>
           <IconButton
@@ -403,103 +399,93 @@ export default function Residences() {
             <CircularProgress />
           </Box>
         ) : residences.length === 0 ? (
-          <Card>
-            <CardContent sx={{ textAlign: 'center', py: { xs: 4, sm: 8 } }}>
-              <Home sx={{ fontSize: { xs: 48, sm: 64 }, color: 'grey.400', mb: 2 }} />
-              <Typography variant="h6" color="text.secondary">
-                No residences found
-              </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                {canAdd ? 'Get started by adding your first residence' : 'No residences available'}
-              </Typography>
-              {canAdd && (
-                <Button variant="contained" startIcon={<Add />} onClick={handleOpenCreateDialog}>
-                  Add Residence
-                </Button>
-              )}
-            </CardContent>
-          </Card>
+          <Box sx={{ textAlign: 'center', py: { xs: 6, sm: 10 } }}>
+            <Home sx={{ fontSize: { xs: 48, sm: 64 }, color: 'grey.400', mb: 2 }} />
+            <Typography variant="h6" color="text.secondary">
+              No residences found
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+              {canAdd ? 'Get started by adding your first residence' : 'No residences available'}
+            </Typography>
+            {canAdd && (
+              <Button variant="contained" startIcon={<Add />} onClick={handleOpenCreateDialog}>
+                Add Residence
+              </Button>
+            )}
+          </Box>
         ) : isMobile ? (
-          /* Mobile Card View */
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            {residences.map((residence) => (
-              <Card
-                key={residence.id}
-                onClick={() => handleOpenEditDialog(residence)}
-                sx={{ cursor: 'pointer' }}
-              >
-                <CardContent sx={{ pb: 1 }}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
-                    <Box>
-                      <Typography variant="h6" component="div">
+          /* Mobile List View */
+          <Box>
+            {residences.map((residence, index) => (
+              <Box key={residence.id}>
+                <Box
+                  onClick={() => handleOpenEditDialog(residence)}
+                  sx={{
+                    py: 2,
+                    cursor: 'pointer',
+                    '&:active': { bgcolor: 'grey.50' },
+                  }}
+                >
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <Box sx={{ flex: 1 }}>
+                      <Typography variant="subtitle1" fontWeight={500}>
                         {residence.house_number}
                       </Typography>
                       <Typography variant="body2" color="text.secondary">
                         {residence.name}
                       </Typography>
+
+                      {residence.phone_numbers.length > 0 && (
+                        <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', mt: 1.5 }}>
+                          {residence.phone_numbers.map((phone) => (
+                            <Chip
+                              key={phone.id}
+                              icon={<Phone />}
+                              label={phone.number}
+                              size="small"
+                              variant={phone.is_primary ? 'filled' : 'outlined'}
+                              color={phone.is_primary ? 'primary' : 'default'}
+                            />
+                          ))}
+                        </Box>
+                      )}
+
+                      {residence.email_addresses.length > 0 && (
+                        <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', mt: 1 }}>
+                          {residence.email_addresses.map((email) => (
+                            <Chip
+                              key={email.id}
+                              icon={<Email />}
+                              label={email.email}
+                              size="small"
+                              variant={email.is_primary ? 'filled' : 'outlined'}
+                              color={email.is_primary ? 'primary' : 'default'}
+                            />
+                          ))}
+                        </Box>
+                      )}
                     </Box>
+
+                    {canDelete && (
+                      <IconButton
+                        size="small"
+                        color="error"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleOpenDeleteDialog(residence);
+                        }}
+                      >
+                        <Delete />
+                      </IconButton>
+                    )}
                   </Box>
-
-                  {residence.phone_numbers.length > 0 && (
-                    <Box sx={{ mt: 2 }}>
-                      <Typography variant="caption" color="text.secondary" display="block" gutterBottom>
-                        Phone Numbers
-                      </Typography>
-                      <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
-                        {residence.phone_numbers.map((phone) => (
-                          <Chip
-                            key={phone.id}
-                            icon={<Phone />}
-                            label={phone.number}
-                            size="small"
-                            variant={phone.is_primary ? 'filled' : 'outlined'}
-                            color={phone.is_primary ? 'primary' : 'default'}
-                          />
-                        ))}
-                      </Box>
-                    </Box>
-                  )}
-
-                  {residence.email_addresses.length > 0 && (
-                    <Box sx={{ mt: 2 }}>
-                      <Typography variant="caption" color="text.secondary" display="block" gutterBottom>
-                        Email Addresses
-                      </Typography>
-                      <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
-                        {residence.email_addresses.map((email) => (
-                          <Chip
-                            key={email.id}
-                            icon={<Email />}
-                            label={email.email}
-                            size="small"
-                            variant={email.is_primary ? 'filled' : 'outlined'}
-                            color={email.is_primary ? 'primary' : 'default'}
-                          />
-                        ))}
-                      </Box>
-                    </Box>
-                  )}
-                </CardContent>
-                {canDelete && (
-                  <CardActions sx={{ justifyContent: 'flex-end', pt: 0 }}>
-                    <Button
-                      size="small"
-                      color="error"
-                      startIcon={<Delete />}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleOpenDeleteDialog(residence);
-                      }}
-                    >
-                      Delete
-                    </Button>
-                  </CardActions>
-                )}
-              </Card>
+                </Box>
+                {index < residences.length - 1 && <Divider />}
+              </Box>
             ))}
 
             {totalPages > 1 && (
-              <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
                 <Pagination
                   count={totalPages}
                   page={page}
@@ -513,7 +499,7 @@ export default function Residences() {
         ) : (
           /* Desktop Table View */
           <>
-            <TableContainer component={Paper}>
+            <TableContainer>
               <Table>
                 <TableHead>
                   <TableRow>
