@@ -41,7 +41,6 @@ import {
   ArrowBack,
   Close,
   Delete,
-  Edit,
   Email,
   Home,
   Logout,
@@ -168,6 +167,14 @@ export default function Residences() {
   };
 
   const handleOpenEditDialog = (residence: Residence) => {
+    if (!canChange) {
+      setSnackbar({
+        open: true,
+        message: 'You do not have permission to edit residences',
+        severity: 'error',
+      });
+      return;
+    }
     setEditingResidence(residence);
     setHouseNumber(residence.house_number);
     setName(residence.name);
@@ -416,7 +423,11 @@ export default function Residences() {
           /* Mobile Card View */
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             {residences.map((residence) => (
-              <Card key={residence.id}>
+              <Card
+                key={residence.id}
+                onClick={() => handleOpenEditDialog(residence)}
+                sx={{ cursor: 'pointer' }}
+              >
                 <CardContent sx={{ pb: 1 }}>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
                     <Box>
@@ -469,27 +480,19 @@ export default function Residences() {
                     </Box>
                   )}
                 </CardContent>
-                {(canChange || canDelete) && (
+                {canDelete && (
                   <CardActions sx={{ justifyContent: 'flex-end', pt: 0 }}>
-                    {canChange && (
-                      <Button
-                        size="small"
-                        startIcon={<Edit />}
-                        onClick={() => handleOpenEditDialog(residence)}
-                      >
-                        Edit
-                      </Button>
-                    )}
-                    {canDelete && (
-                      <Button
-                        size="small"
-                        color="error"
-                        startIcon={<Delete />}
-                        onClick={() => handleOpenDeleteDialog(residence)}
-                      >
-                        Delete
-                      </Button>
-                    )}
+                    <Button
+                      size="small"
+                      color="error"
+                      startIcon={<Delete />}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleOpenDeleteDialog(residence);
+                      }}
+                    >
+                      Delete
+                    </Button>
                   </CardActions>
                 )}
               </Card>
@@ -518,12 +521,17 @@ export default function Residences() {
                     <TableCell>Name</TableCell>
                     <TableCell>Phone Numbers</TableCell>
                     <TableCell>Email Addresses</TableCell>
-                    {(canChange || canDelete) && <TableCell align="right">Actions</TableCell>}
+                    {canDelete && <TableCell align="right">Actions</TableCell>}
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {residences.map((residence) => (
-                    <TableRow key={residence.id} hover>
+                    <TableRow
+                      key={residence.id}
+                      hover
+                      onClick={() => handleOpenEditDialog(residence)}
+                      sx={{ cursor: 'pointer' }}
+                    >
                       <TableCell>
                         <Typography fontWeight="medium">{residence.house_number}</Typography>
                       </TableCell>
@@ -566,29 +574,20 @@ export default function Residences() {
                           )}
                         </Box>
                       </TableCell>
-                      {(canChange || canDelete) && (
+                      {canDelete && (
                         <TableCell align="right">
-                          {canChange && (
-                            <Tooltip title="Edit">
-                              <IconButton
-                                size="small"
-                                onClick={() => handleOpenEditDialog(residence)}
-                              >
-                                <Edit />
-                              </IconButton>
-                            </Tooltip>
-                          )}
-                          {canDelete && (
-                            <Tooltip title="Delete">
-                              <IconButton
-                                size="small"
-                                color="error"
-                                onClick={() => handleOpenDeleteDialog(residence)}
-                              >
-                                <Delete />
-                              </IconButton>
-                            </Tooltip>
-                          )}
+                          <Tooltip title="Delete">
+                            <IconButton
+                              size="small"
+                              color="error"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleOpenDeleteDialog(residence);
+                              }}
+                            >
+                              <Delete />
+                            </IconButton>
+                          </Tooltip>
                         </TableCell>
                       )}
                     </TableRow>
