@@ -649,7 +649,7 @@ export default function Residences() {
           </DialogContent>
           {!isMobile && (
             <DialogActions sx={{ px: 3, pb: 2 }}>
-              <Button onClick={handleCloseDialog}>
+              <Button variant="outlined" onClick={handleCloseDialog}>
                 Cancel
               </Button>
               <Button
@@ -677,7 +677,7 @@ export default function Residences() {
           </DialogContentText>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
-          <Button onClick={handleCloseDeleteDialog}>
+          <Button variant="outlined" onClick={handleCloseDeleteDialog}>
             Cancel
           </Button>
           <Button
