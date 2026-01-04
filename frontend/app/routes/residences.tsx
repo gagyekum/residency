@@ -13,7 +13,6 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
-  FormControlLabel,
   IconButton,
   InputAdornment,
   Pagination,
@@ -596,8 +595,8 @@ export default function Residences() {
             />
 
             {/* Phone Numbers */}
-            <Box sx={{ mb: 3 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+            <Box sx={{ mb: 2 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
                 <Typography variant="body2" fontWeight={500}>
                   Phone Numbers
                 </Typography>
@@ -608,33 +607,27 @@ export default function Residences() {
               {phoneNumbers.map((phone, index) => (
                 <Box
                   key={index}
-                  sx={{ display: 'flex', gap: 1, mb: 1.5, alignItems: 'center' }}
+                  sx={{ display: 'flex', gap: 1, mb: 1, alignItems: 'center' }}
                 >
                   <TextField
                     size="small"
-                    label="Number"
+                    placeholder="Phone number"
                     value={phone.number}
                     onChange={(e) => handlePhoneChange(index, 'number', e.target.value)}
-                    sx={{ flex: 2 }}
+                    sx={{ flex: 1 }}
                   />
                   <TextField
                     size="small"
-                    label="Label"
-                    placeholder="Mobile"
+                    placeholder="Label"
                     value={phone.label}
                     onChange={(e) => handlePhoneChange(index, 'label', e.target.value)}
-                    sx={{ flex: 1 }}
+                    sx={{ width: 100 }}
                   />
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        size="small"
-                        checked={phone.is_primary}
-                        onChange={(e) => handlePhoneChange(index, 'is_primary', e.target.checked)}
-                      />
-                    }
-                    label="Primary"
-                    sx={{ mx: 0 }}
+                  <Checkbox
+                    size="small"
+                    checked={phone.is_primary}
+                    onChange={(e) => handlePhoneChange(index, 'is_primary', e.target.checked)}
+                    title="Primary"
                   />
                   <IconButton
                     size="small"
@@ -649,7 +642,7 @@ export default function Residences() {
 
             {/* Email Addresses */}
             <Box>
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
                 <Typography variant="body2" fontWeight={500}>
                   Email Addresses
                 </Typography>
@@ -660,34 +653,28 @@ export default function Residences() {
               {emailAddresses.map((email, index) => (
                 <Box
                   key={index}
-                  sx={{ display: 'flex', gap: 1, mb: 1.5, alignItems: 'center' }}
+                  sx={{ display: 'flex', gap: 1, mb: 1, alignItems: 'center' }}
                 >
                   <TextField
                     size="small"
-                    label="Email"
+                    placeholder="Email address"
                     type="email"
                     value={email.email}
                     onChange={(e) => handleEmailChange(index, 'email', e.target.value)}
-                    sx={{ flex: 2 }}
+                    sx={{ flex: 1 }}
                   />
                   <TextField
                     size="small"
-                    label="Label"
-                    placeholder="Personal"
+                    placeholder="Label"
                     value={email.label}
                     onChange={(e) => handleEmailChange(index, 'label', e.target.value)}
-                    sx={{ flex: 1 }}
+                    sx={{ width: 100 }}
                   />
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        size="small"
-                        checked={email.is_primary}
-                        onChange={(e) => handleEmailChange(index, 'is_primary', e.target.checked)}
-                      />
-                    }
-                    label="Primary"
-                    sx={{ mx: 0 }}
+                  <Checkbox
+                    size="small"
+                    checked={email.is_primary}
+                    onChange={(e) => handleEmailChange(index, 'is_primary', e.target.checked)}
+                    title="Primary"
                   />
                   <IconButton
                     size="small"
