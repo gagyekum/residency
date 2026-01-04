@@ -13,7 +13,6 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
-  Divider,
   FormControlLabel,
   IconButton,
   Pagination,
@@ -416,8 +415,8 @@ export default function Residences() {
               <Table size="small" sx={{ minWidth: 600 }}>
                 <TableHead>
                   <TableRow>
-                    <TableCell>House #</TableCell>
-                    <TableCell>Name</TableCell>
+                    <TableCell>#</TableCell>
+                    <TableCell>Title</TableCell>
                     <TableCell>Phones</TableCell>
                     <TableCell>Emails</TableCell>
                     {canDelete && <TableCell align="right">Actions</TableCell>}
@@ -492,23 +491,29 @@ export default function Residences() {
         fullWidth
         fullScreen={isMobile}
       >
-        <DialogTitle>
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              {isMobile && (
-                <IconButton edge="start" onClick={handleCloseDialog} size="small">
-                  <ArrowBack />
-                </IconButton>
-              )}
-              {editingResidence ? 'Edit Residence' : 'Add New Residence'}
-            </Box>
-            {!isMobile && (
-              <IconButton onClick={handleCloseDialog} size="small">
+        {isMobile ? (
+          <AppBar position="static" color="default" elevation={0} sx={{ borderBottom: 1, borderColor: 'divider' }}>
+            <Toolbar>
+              <IconButton edge="start" onClick={handleCloseDialog}>
                 <Close />
               </IconButton>
-            )}
-          </Box>
-        </DialogTitle>
+              <Typography variant="h6" sx={{ flex: 1, ml: 1 }}>
+                {editingResidence ? 'Edit Residence' : 'Add Residence'}
+              </Typography>
+              <Button
+                color="primary"
+                onClick={handleSubmit}
+                disabled={saving}
+              >
+                {saving ? <CircularProgress size={20} /> : 'Save'}
+              </Button>
+            </Toolbar>
+          </AppBar>
+        ) : (
+          <DialogTitle>
+            {editingResidence ? 'Edit Residence' : 'Add Residence'}
+          </DialogTitle>
+        )}
         <Box component="form" onSubmit={handleSubmit}>
           <DialogContent>
             {formError && (
@@ -524,7 +529,7 @@ export default function Residences() {
               label="House Number"
               value={houseNumber}
               onChange={(e) => setHouseNumber(e.target.value)}
-              margin="normal"
+              sx={{ mb: 2 }}
             />
 
             <TextField
@@ -534,179 +539,128 @@ export default function Residences() {
               placeholder="e.g., Mr. & Mrs. Mensah"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              margin="normal"
+              sx={{ mb: 3 }}
             />
 
-            <Divider sx={{ my: 3 }} />
-
             {/* Phone Numbers */}
-            <Box sx={{ mb: 2 }}>
-              <Box
-                sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}
-              >
-                <Typography variant="subtitle2" color="text.secondary">
+            <Box sx={{ mb: 3 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+                <Typography variant="body2" fontWeight={500}>
                   Phone Numbers
                 </Typography>
-                <Button size="small" startIcon={<Add />} onClick={handleAddPhone}>
-                  Add Phone
+                <Button size="small" onClick={handleAddPhone}>
+                  + Add
                 </Button>
               </Box>
               {phoneNumbers.map((phone, index) => (
                 <Box
                   key={index}
-                  sx={{
-                    display: 'flex',
-                    flexDirection: { xs: 'column', sm: 'row' },
-                    gap: 1,
-                    mb: 2,
-                    alignItems: { xs: 'stretch', sm: 'center' },
-                    p: { xs: 1.5, sm: 0 },
-                    bgcolor: { xs: 'grey.50', sm: 'transparent' },
-                    borderRadius: { xs: 1, sm: 0 },
-                  }}
+                  sx={{ display: 'flex', gap: 1, mb: 1.5, alignItems: 'center' }}
                 >
-                  <Box sx={{ display: 'flex', gap: 1, flex: 1 }}>
-                    <TextField
-                      size="small"
-                      label="Phone Number"
-                      value={phone.number}
-                      onChange={(e) => handlePhoneChange(index, 'number', e.target.value)}
-                      sx={{ flex: 2 }}
-                      fullWidth
-                    />
-                    <TextField
-                      size="small"
-                      label="Label"
-                      placeholder="Mobile"
-                      value={phone.label}
-                      onChange={(e) => handlePhoneChange(index, 'label', e.target.value)}
-                      sx={{ flex: 1 }}
-                    />
-                  </Box>
-                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          size="small"
-                          checked={phone.is_primary}
-                          onChange={(e) => handlePhoneChange(index, 'is_primary', e.target.checked)}
-                        />
-                      }
-                      label="Primary"
-                    />
-                    <IconButton
-                      size="small"
-                      onClick={() => handleRemovePhone(index)}
-                      disabled={phoneNumbers.length === 1 && phone.number === ''}
-                    >
-                      <Delete />
-                    </IconButton>
-                  </Box>
+                  <TextField
+                    size="small"
+                    label="Number"
+                    value={phone.number}
+                    onChange={(e) => handlePhoneChange(index, 'number', e.target.value)}
+                    sx={{ flex: 2 }}
+                  />
+                  <TextField
+                    size="small"
+                    label="Label"
+                    placeholder="Mobile"
+                    value={phone.label}
+                    onChange={(e) => handlePhoneChange(index, 'label', e.target.value)}
+                    sx={{ flex: 1 }}
+                  />
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        size="small"
+                        checked={phone.is_primary}
+                        onChange={(e) => handlePhoneChange(index, 'is_primary', e.target.checked)}
+                      />
+                    }
+                    label="Primary"
+                    sx={{ mx: 0 }}
+                  />
+                  <IconButton
+                    size="small"
+                    onClick={() => handleRemovePhone(index)}
+                    disabled={phoneNumbers.length === 1 && phone.number === ''}
+                  >
+                    <Delete fontSize="small" />
+                  </IconButton>
                 </Box>
               ))}
             </Box>
 
-            <Divider sx={{ my: 3 }} />
-
             {/* Email Addresses */}
             <Box>
-              <Box
-                sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}
-              >
-                <Typography variant="subtitle2" color="text.secondary">
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+                <Typography variant="body2" fontWeight={500}>
                   Email Addresses
                 </Typography>
-                <Button size="small" startIcon={<Add />} onClick={handleAddEmail}>
-                  Add Email
+                <Button size="small" onClick={handleAddEmail}>
+                  + Add
                 </Button>
               </Box>
               {emailAddresses.map((email, index) => (
                 <Box
                   key={index}
-                  sx={{
-                    display: 'flex',
-                    flexDirection: { xs: 'column', sm: 'row' },
-                    gap: 1,
-                    mb: 2,
-                    alignItems: { xs: 'stretch', sm: 'center' },
-                    p: { xs: 1.5, sm: 0 },
-                    bgcolor: { xs: 'grey.50', sm: 'transparent' },
-                    borderRadius: { xs: 1, sm: 0 },
-                  }}
+                  sx={{ display: 'flex', gap: 1, mb: 1.5, alignItems: 'center' }}
                 >
-                  <Box sx={{ display: 'flex', gap: 1, flex: 1 }}>
-                    <TextField
-                      size="small"
-                      label="Email Address"
-                      type="email"
-                      value={email.email}
-                      onChange={(e) => handleEmailChange(index, 'email', e.target.value)}
-                      sx={{ flex: 2 }}
-                      fullWidth
-                    />
-                    <TextField
-                      size="small"
-                      label="Label"
-                      placeholder="Personal"
-                      value={email.label}
-                      onChange={(e) => handleEmailChange(index, 'label', e.target.value)}
-                      sx={{ flex: 1 }}
-                    />
-                  </Box>
-                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          size="small"
-                          checked={email.is_primary}
-                          onChange={(e) => handleEmailChange(index, 'is_primary', e.target.checked)}
-                        />
-                      }
-                      label="Primary"
-                    />
-                    <IconButton
-                      size="small"
-                      onClick={() => handleRemoveEmail(index)}
-                      disabled={emailAddresses.length === 1 && email.email === ''}
-                    >
-                      <Delete />
-                    </IconButton>
-                  </Box>
+                  <TextField
+                    size="small"
+                    label="Email"
+                    type="email"
+                    value={email.email}
+                    onChange={(e) => handleEmailChange(index, 'email', e.target.value)}
+                    sx={{ flex: 2 }}
+                  />
+                  <TextField
+                    size="small"
+                    label="Label"
+                    placeholder="Personal"
+                    value={email.label}
+                    onChange={(e) => handleEmailChange(index, 'label', e.target.value)}
+                    sx={{ flex: 1 }}
+                  />
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        size="small"
+                        checked={email.is_primary}
+                        onChange={(e) => handleEmailChange(index, 'is_primary', e.target.checked)}
+                      />
+                    }
+                    label="Primary"
+                    sx={{ mx: 0 }}
+                  />
+                  <IconButton
+                    size="small"
+                    onClick={() => handleRemoveEmail(index)}
+                    disabled={emailAddresses.length === 1 && email.email === ''}
+                  >
+                    <Delete fontSize="small" />
+                  </IconButton>
                 </Box>
               ))}
             </Box>
           </DialogContent>
-          <DialogActions
-            sx={{
-              px: 3,
-              pb: 2,
-              flexDirection: { xs: 'column', sm: 'row' },
-              gap: { xs: 1, sm: 0 },
-            }}
-          >
-            <Button
-              onClick={handleCloseDialog}
-              fullWidth={isMobile}
-              sx={{ order: { xs: 2, sm: 1 } }}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              variant="contained"
-              disabled={saving}
-              fullWidth={isMobile}
-              sx={{ order: { xs: 1, sm: 2 } }}
-            >
-              {saving ? (
-                <CircularProgress size={24} />
-              ) : editingResidence ? (
-                'Update Residence'
-              ) : (
-                'Create Residence'
-              )}
-            </Button>
-          </DialogActions>
+          {!isMobile && (
+            <DialogActions sx={{ px: 3, pb: 2 }}>
+              <Button onClick={handleCloseDialog}>
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                variant="contained"
+                disabled={saving}
+              >
+                {saving ? <CircularProgress size={20} /> : 'Save'}
+              </Button>
+            </DialogActions>
+          )}
         </Box>
       </Dialog>
 
@@ -714,36 +668,16 @@ export default function Residences() {
       <Dialog
         open={deleteDialogOpen}
         onClose={handleCloseDeleteDialog}
-        fullWidth
         maxWidth="xs"
-        sx={{
-          '& .MuiDialog-paper': {
-            mx: { xs: 2, sm: 'auto' },
-            width: { xs: 'calc(100% - 32px)', sm: 'auto' },
-          },
-        }}
       >
         <DialogTitle>Delete Residence</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Are you sure you want to delete residence{' '}
-            <strong>{deletingResidence?.house_number}</strong> ({deletingResidence?.name})? This
-            action cannot be undone.
+            Delete <strong>{deletingResidence?.house_number}</strong> ({deletingResidence?.name})?
           </DialogContentText>
         </DialogContent>
-        <DialogActions
-          sx={{
-            flexDirection: { xs: 'column', sm: 'row' },
-            gap: { xs: 1, sm: 0 },
-            px: { xs: 2, sm: 1 },
-            pb: { xs: 2, sm: 1 },
-          }}
-        >
-          <Button
-            onClick={handleCloseDeleteDialog}
-            fullWidth={isMobile}
-            sx={{ order: { xs: 2, sm: 1 } }}
-          >
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button onClick={handleCloseDeleteDialog}>
             Cancel
           </Button>
           <Button
@@ -751,10 +685,8 @@ export default function Residences() {
             color="error"
             variant="contained"
             disabled={deleting}
-            fullWidth={isMobile}
-            sx={{ order: { xs: 1, sm: 2 } }}
           >
-            {deleting ? <CircularProgress size={24} /> : 'Delete'}
+            {deleting ? <CircularProgress size={20} /> : 'Delete'}
           </Button>
         </DialogActions>
       </Dialog>
