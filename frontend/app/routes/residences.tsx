@@ -656,6 +656,7 @@ export default function Residences() {
                 type="submit"
                 variant="contained"
                 disabled={saving}
+                sx={{ minWidth: 100 }}
               >
                 {saving ? <CircularProgress size={20} /> : 'Save'}
               </Button>
@@ -685,6 +686,7 @@ export default function Residences() {
             color="error"
             variant="contained"
             disabled={deleting}
+            sx={{ minWidth: 100 }}
           >
             {deleting ? <CircularProgress size={20} /> : 'Delete'}
           </Button>
