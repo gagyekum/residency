@@ -6,8 +6,11 @@ import {
   Scripts,
   ScrollRestoration,
 } from "react-router";
+import { ThemeProvider } from "@mui/material/styles";
+import CssBaseline from "@mui/material/CssBaseline";
 
 import type { Route } from "./+types/root";
+import theme from "./theme";
 import "./app.css";
 
 export const links: Route.LinksFunction = () => [
@@ -42,7 +45,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  return <Outlet />;
+  return (
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Outlet />
+    </ThemeProvider>
+  );
 }
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
