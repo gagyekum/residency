@@ -1,4 +1,5 @@
-const API_URL = 'http://localhost:8000/api/v1';
+// Use relative URL - works when proxied through Django
+const API_URL = '/api/v1';
 
 export interface AuthTokens {
   access: string;

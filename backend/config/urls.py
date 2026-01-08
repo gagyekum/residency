@@ -14,11 +14,20 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+from django.conf import settings
 from django.contrib import admin
-from django.urls import include, path
+from django.urls import include, path, re_path
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/v1/users/', include('apps.users.urls')),
     path('api/v1/residences/', include('apps.residences.urls')),
 ]
+
+# In development, proxy all other requests to Vite dev server
+if settings.DEBUG:
+    from .proxy import proxy_to_vite
+
+    urlpatterns += [
+        re_path(r'^(?P<path>.*)$', proxy_to_vite, name='vite-proxy'),
+    ]

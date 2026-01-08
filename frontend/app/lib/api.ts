@@ -1,6 +1,7 @@
 import { getStoredTokens, refreshToken, storeTokens, clearTokens, isTokenExpired } from './auth';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
+// Use relative URL - works when proxied through Django
+const API_URL = '/api/v1';
 
 // Custom error class for permission errors
 export class PermissionError extends Error {
