@@ -171,6 +171,11 @@ CORS_ALLOWED_ORIGINS = [
     'http://127.0.0.1:5173',
 ]
 
+# Add ngrok or other origins from environment
+EXTRA_CORS_ORIGINS = os.environ.get('CORS_ALLOWED_ORIGINS', '')
+if EXTRA_CORS_ORIGINS:
+    CORS_ALLOWED_ORIGINS.extend([origin.strip() for origin in EXTRA_CORS_ORIGINS.split(',') if origin.strip()])
+
 CORS_ALLOW_CREDENTIALS = True
 
 CORS_ALLOW_HEADERS = [
@@ -181,3 +186,6 @@ CORS_ALLOW_HEADERS = [
     'x-csrftoken',
     'x-requested-with',
 ]
+
+# Allow Private Network Access (for ngrok -> localhost during development)
+CORS_ALLOW_PRIVATE_NETWORK = True
