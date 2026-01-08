@@ -10,39 +10,47 @@ Residency is a full-stack application for managing residential properties. It co
 
 ## Development Commands
 
-### Backend (run from `backend/` directory)
-```bash
-# Activate virtual environment
-source .venv/bin/activate
+### Running the App Locally
 
-# Run development server
+The frontend and backend are connected via proxy:
+- **Vite** (port 5173) proxies `/api` requests to Django (port 8000)
+- **Django** (port 8000) proxies frontend requests to Vite (port 5173)
+
+You can access the app via either port - both work the same way.
+
+```bash
+# Terminal 1: Start backend (from backend/)
+source .venv/bin/activate
 python manage.py runserver
 
-# Run migrations
-python manage.py migrate
+# Terminal 2: Start frontend (from frontend/)
+npm run dev
 
-# Create new migrations
-python manage.py makemigrations
-
-# Run all tests
-python manage.py test
-
-# Run tests for a specific app
-python manage.py test apps.users
-python manage.py test apps.residences
-
-# Run a single test class or method
-python manage.py test apps.users.tests.TestClassName
-python manage.py test apps.users.tests.TestClassName.test_method_name
-
-# Create superuser
-python manage.py createsuperuser
-
-# Install dependencies
-pip install -r requirements.txt
+# Access app at http://localhost:5173 or http://localhost:8000
 ```
 
-### Frontend (run from `frontend/` directory)
+### With ngrok (for mobile testing)
+```bash
+# Add ngrok host to ALLOWED_HOSTS
+ALLOWED_HOSTS=your-subdomain.ngrok-free.app python manage.py runserver
+
+# In another terminal
+ngrok http 8000
+```
+
+### Backend Commands (run from `backend/` directory)
+```bash
+source .venv/bin/activate     # Activate virtual environment
+python manage.py runserver    # Run development server
+python manage.py migrate      # Run migrations
+python manage.py makemigrations # Create new migrations
+python manage.py test         # Run all tests
+python manage.py test apps.users # Run tests for a specific app
+python manage.py createsuperuser # Create superuser
+pip install -r requirements.txt  # Install dependencies
+```
+
+### Frontend Commands (run from `frontend/` directory)
 ```bash
 npm run dev       # Start development server (port 5173)
 npm run build     # Build for production
@@ -70,10 +78,13 @@ backend/
 ├── config/
 │   ├── settings/
 │   │   ├── base.py     # Common settings (JWT, CORS, REST framework)
-│   │   ├── dev.py      # Development (DEBUG=True)
-│   │   └── prod.py     # Production (DEBUG=False)
+│   │   ├── dev.py      # Development (DEBUG=True, DB_* variables)
+│   │   └── prod.py     # Production (DEBUG=False, DATABASE_URL)
+│   ├── proxy.py        # Proxies frontend requests to Vite dev server
 │   ├── urls.py         # API routes under /api/v1/
 │   └── wsgi.py / asgi.py
+├── gunicorn.conf.py    # Gunicorn production config
+├── Procfile            # Production deployment commands
 └── manage.py
 ```
 
@@ -138,6 +149,9 @@ frontend/
 - django-cors-headers (CORS support)
 - psycopg2-binary (PostgreSQL)
 - python-dotenv (environment variables)
+- gunicorn (production server)
+- whitenoise (static files)
+- dj-database-url (production database config)
 
 ### Frontend
 - React Router v7 (Remix)
@@ -146,13 +160,35 @@ frontend/
 
 ## Environment Variables
 
-Backend `.env` file (in `backend/`):
+`.env` file in project root (see `.env.example`):
+
+### Development
 ```
 SECRET_KEY=your-secret-key
-DEBUG=True
+DJANGO_SETTINGS_MODULE=config.settings.dev
 DB_NAME=tenancy
 DB_USER=your-user
 DB_PASSWORD=your-password
 DB_HOST=localhost
 DB_PORT=5432
+```
+
+### Production
+```
+SECRET_KEY=your-secret-key
+DJANGO_SETTINGS_MODULE=config.settings.prod
+DATABASE_URL=postgres://user:password@host:5432/dbname
+ALLOWED_HOSTS=yourdomain.com
+CORS_ALLOWED_ORIGINS=https://yourdomain.com
+```
+
+## Production Deployment
+
+```bash
+# Run with gunicorn
+gunicorn config.wsgi:application --config gunicorn.conf.py
+
+# Or use Procfile (for Heroku/Railway/etc.)
+# release: python manage.py migrate --noinput && python manage.py collectstatic --noinput
+# web: gunicorn config.wsgi:application --config gunicorn.conf.py
 ```
