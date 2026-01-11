@@ -101,3 +101,32 @@ class EmailJobViewSet(viewsets.ModelViewSet):
                 if job.total_recipients > 0 else 0
             ),
         })
+
+    @action(detail=True, methods=['get'])
+    def recipients(self, request, pk=None):
+        """
+        Get paginated recipients for a job.
+        GET /api/v1/emails/{id}/recipients/?page=1
+        """
+        from .serializers import EmailRecipientSerializer
+
+        job = self.get_object()
+        recipients = job.recipients.select_related('residence').all()
+
+        # Manual pagination
+        page = int(request.query_params.get('page', 1))
+        page_size = 10
+        start = (page - 1) * page_size
+        end = start + page_size
+
+        total_count = recipients.count()
+        paginated_recipients = recipients[start:end]
+
+        serializer = EmailRecipientSerializer(paginated_recipients, many=True)
+
+        return Response({
+            'count': total_count,
+            'next': page * page_size < total_count,
+            'page': page,
+            'results': serializer.data,
+        })

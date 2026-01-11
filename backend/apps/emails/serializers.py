@@ -17,8 +17,8 @@ class EmailRecipientSerializer(serializers.ModelSerializer):
 
 
 class EmailJobSerializer(serializers.ModelSerializer):
+    """Serializer for job details (recipients fetched separately via /recipients/ endpoint)."""
     sender_email = serializers.EmailField(source='sender.email', read_only=True)
-    recipients = EmailRecipientSerializer(many=True, read_only=True)
     progress_percent = serializers.SerializerMethodField()
 
     class Meta:
@@ -27,12 +27,12 @@ class EmailJobSerializer(serializers.ModelSerializer):
             'id', 'subject', 'body', 'sender', 'sender_email', 'status',
             'total_recipients', 'sent_count', 'failed_count',
             'error_message', 'created_at', 'started_at', 'completed_at',
-            'recipients', 'progress_percent'
+            'progress_percent'
         ]
         read_only_fields = [
             'id', 'sender', 'sender_email', 'status', 'total_recipients',
             'sent_count', 'failed_count', 'error_message', 'created_at',
-            'started_at', 'completed_at', 'recipients', 'progress_percent'
+            'started_at', 'completed_at', 'progress_percent'
         ]
 
     def get_progress_percent(self, obj):

@@ -217,8 +217,14 @@ export interface EmailJob {
   created_at: string;
   started_at: string | null;
   completed_at: string | null;
-  recipients: EmailRecipient[];
   progress_percent: number;
+}
+
+export interface EmailRecipientsResponse {
+  count: number;
+  next: boolean;
+  page: number;
+  results: EmailRecipient[];
 }
 
 export interface EmailJobListItem {
@@ -266,4 +272,8 @@ export async function createEmailJob(data: EmailJobInput): Promise<EmailJob> {
     method: 'POST',
     body: JSON.stringify(data),
   });
+}
+
+export async function getEmailJobRecipients(jobId: number, page = 1): Promise<EmailRecipientsResponse> {
+  return apiFetch<EmailRecipientsResponse>(`/emails/${jobId}/recipients/?page=${page}`);
 }

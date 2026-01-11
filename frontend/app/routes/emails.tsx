@@ -45,6 +45,7 @@ import {
   getEmailJobs,
   getEmailJob,
   getEmailJobStatus,
+  getEmailJobRecipients,
   createEmailJob,
   getCurrentUser,
   hasPermission,
@@ -53,6 +54,7 @@ import {
   type EmailJob,
   type EmailJobListItem,
   type EmailJobStatus,
+  type EmailRecipient,
   type PaginatedResponse,
   type User,
 } from '~/lib/api';
@@ -84,6 +86,10 @@ export default function Emails() {
   const [detailOpen, setDetailOpen] = useState(false);
   const [detailJob, setDetailJob] = useState<EmailJob | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
+  const [recipients, setRecipients] = useState<EmailRecipient[]>([]);
+  const [recipientsPage, setRecipientsPage] = useState(1);
+  const [hasMoreRecipients, setHasMoreRecipients] = useState(false);
+  const [loadingMoreRecipients, setLoadingMoreRecipients] = useState(false);
 
   // Snackbar state
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' as 'success' | 'error' });
@@ -225,9 +231,17 @@ export default function Emails() {
   const handleViewDetail = async (jobId: number) => {
     setDetailLoading(true);
     setDetailOpen(true);
+    setRecipients([]);
+    setRecipientsPage(1);
+    setHasMoreRecipients(false);
     try {
-      const job = await getEmailJob(jobId);
+      const [job, recipientsData] = await Promise.all([
+        getEmailJob(jobId),
+        getEmailJobRecipients(jobId, 1),
+      ]);
       setDetailJob(job);
+      setRecipients(recipientsData.results);
+      setHasMoreRecipients(recipientsData.next);
     } catch (err) {
       setSnackbar({ open: true, message: 'Failed to load email details', severity: 'error' });
       setDetailOpen(false);
@@ -236,9 +250,28 @@ export default function Emails() {
     }
   };
 
+  const handleLoadMoreRecipients = async () => {
+    if (!detailJob || loadingMoreRecipients) return;
+    setLoadingMoreRecipients(true);
+    try {
+      const nextPage = recipientsPage + 1;
+      const data = await getEmailJobRecipients(detailJob.id, nextPage);
+      setRecipients((prev) => [...prev, ...data.results]);
+      setRecipientsPage(nextPage);
+      setHasMoreRecipients(data.next);
+    } catch (err) {
+      setSnackbar({ open: true, message: 'Failed to load more recipients', severity: 'error' });
+    } finally {
+      setLoadingMoreRecipients(false);
+    }
+  };
+
   const handleCloseDetail = () => {
     setDetailOpen(false);
     setDetailJob(null);
+    setRecipients([]);
+    setRecipientsPage(1);
+    setHasMoreRecipients(false);
   };
 
   const getStatusColor = (status: string) => {
@@ -616,7 +649,7 @@ export default function Emails() {
 
               {isMobile ? (
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                  {detailJob.recipients.map((recipient) => (
+                  {recipients.map((recipient) => (
                     <Card key={recipient.id} variant="outlined">
                       <CardContent sx={{ py: 1, '&:last-child': { pb: 1 } }}>
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -656,7 +689,7 @@ export default function Emails() {
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {detailJob.recipients.map((recipient) => (
+                      {recipients.map((recipient) => (
                         <TableRow key={recipient.id}>
                           <TableCell>{recipient.house_number}</TableCell>
                           <TableCell>{recipient.residence_name}</TableCell>
@@ -676,6 +709,19 @@ export default function Emails() {
                     </TableBody>
                   </Table>
                 </TableContainer>
+              )}
+
+              {hasMoreRecipients && (
+                <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+                  <Button
+                    variant="outlined"
+                    onClick={handleLoadMoreRecipients}
+                    disabled={loadingMoreRecipients}
+                    startIcon={loadingMoreRecipients ? <CircularProgress size={20} /> : null}
+                  >
+                    {loadingMoreRecipients ? 'Loading...' : 'Load More'}
+                  </Button>
+                </Box>
               )}
             </Box>
           )}
