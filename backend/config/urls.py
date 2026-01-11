@@ -25,10 +25,17 @@ urlpatterns = [
     path('api/v1/emails/', include('apps.emails.urls')),
 ]
 
-# In development, proxy all other requests to Vite dev server
 if settings.DEBUG:
+    # In development, proxy all other requests to Vite dev server
     from .proxy import proxy_to_vite
 
     urlpatterns += [
         re_path(r'^(?P<path>.*)$', proxy_to_vite, name='vite-proxy'),
+    ]
+else:
+    # In production, serve the SPA frontend
+    from .spa import serve_spa
+
+    urlpatterns += [
+        re_path(r'^(?P<path>.*)$', serve_spa, name='spa'),
     ]

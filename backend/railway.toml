@@ -1,0 +1,12 @@
+# Railway configuration for Django backend
+
+[build]
+builder = "nixpacks"
+buildCommand = "pip install -r requirements.txt"
+
+[deploy]
+startCommand = "python manage.py migrate --noinput && python manage.py collectstatic --noinput && gunicorn config.wsgi:application --config gunicorn.conf.py"
+healthcheckPath = "/admin/"
+healthcheckTimeout = 30
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 3
