@@ -18,6 +18,7 @@ import {
   LinearProgress,
   Pagination,
   Snackbar,
+  Stack,
   Table,
   TableBody,
   TableCell,
@@ -420,7 +421,7 @@ export default function Emails() {
           </Alert>
         ) : isMobile ? (
           // Mobile card view
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pb: 3 }}>
+          <Stack spacing={2} sx={{ pb: 3 }}>
             {jobs.map((job) => (
               <Card key={job.id} variant="outlined" sx={{ cursor: 'pointer' }} onClick={() => handleViewDetail(job.id)}>
                 <CardContent>
@@ -437,7 +438,7 @@ export default function Emails() {
                   <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
                     {formatDate(job.created_at)}
                   </Typography>
-                  <Box sx={{ display: 'flex', gap: 2 }}>
+                  <Stack direction="row" spacing={2}>
                     <Typography variant="body2">
                       Recipients: {job.total_recipients}
                     </Typography>
@@ -449,14 +450,14 @@ export default function Emails() {
                         Failed: {job.failed_count}
                       </Typography>
                     )}
-                  </Box>
+                  </Stack>
                   {job.status === 'processing' && (
                     <LinearProgress variant="determinate" value={job.progress_percent} sx={{ mt: 1 }} />
                   )}
                 </CardContent>
               </Card>
             ))}
-          </Box>
+          </Stack>
         ) : (
           // Desktop table view
           <TableContainer>
@@ -673,7 +674,7 @@ export default function Emails() {
               </Typography>
 
               {isMobile ? (
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                <Stack spacing={1}>
                   {recipients.map((recipient) => (
                     <Card key={recipient.id} variant="outlined">
                       <CardContent sx={{ py: 1, '&:last-child': { pb: 1 } }}>
@@ -700,7 +701,7 @@ export default function Emails() {
                       </CardContent>
                     </Card>
                   ))}
-                </Box>
+                </Stack>
               ) : (
                 <TableContainer sx={{ maxHeight: 300 }}>
                   <Table size="small" stickyHeader>
