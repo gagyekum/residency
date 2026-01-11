@@ -145,14 +145,13 @@ export default function Emails() {
   useEffect(() => {
     if (!activeJobId || !composeOpen) return;
 
+    // Don't poll if already complete
+    if (progress?.status === 'completed' || progress?.status === 'failed') return;
+
     const pollStatus = async () => {
       try {
         const status = await getEmailJobStatus(activeJobId);
         setProgress(status);
-
-        if (status.status === 'completed' || status.status === 'failed') {
-          fetchJobs();
-        }
       } catch (err) {
         console.error('Failed to poll status:', err);
       }
@@ -165,7 +164,7 @@ export default function Emails() {
     const pollInterval = setInterval(pollStatus, 2000);
 
     return () => clearInterval(pollInterval);
-  }, [activeJobId, composeOpen, fetchJobs]);
+  }, [activeJobId, composeOpen, progress?.status]);
 
   const handleLogout = () => {
     clearTokens();
@@ -182,6 +181,10 @@ export default function Emails() {
   };
 
   const handleCloseCompose = () => {
+    // Refresh list if we just finished sending
+    if (progress) {
+      fetchJobs();
+    }
     setComposeOpen(false);
     setActiveJobId(null);
     setProgress(null);
