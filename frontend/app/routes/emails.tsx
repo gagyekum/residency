@@ -76,9 +76,6 @@ export default function Emails() {
   const [body, setBody] = useState('');
   const [sending, setSending] = useState(false);
   const [formError, setFormError] = useState('');
-
-  // Progress dialog state
-  const [progressOpen, setProgressOpen] = useState(false);
   const [activeJobId, setActiveJobId] = useState<number | null>(null);
   const [progress, setProgress] = useState<EmailJobStatus | null>(null);
 
@@ -144,9 +141,9 @@ export default function Emails() {
     }
   }, [user, fetchJobs]);
 
-  // Polling for progress
+  // Polling for progress (in compose dialog)
   useEffect(() => {
-    if (!activeJobId || !progressOpen) return;
+    if (!activeJobId || !composeOpen) return;
 
     const pollStatus = async () => {
       try {
@@ -168,7 +165,7 @@ export default function Emails() {
     const pollInterval = setInterval(pollStatus, 2000);
 
     return () => clearInterval(pollInterval);
-  }, [activeJobId, progressOpen, fetchJobs]);
+  }, [activeJobId, composeOpen, fetchJobs]);
 
   const handleLogout = () => {
     clearTokens();
@@ -179,11 +176,15 @@ export default function Emails() {
     setSubject('');
     setBody('');
     setFormError('');
+    setActiveJobId(null);
+    setProgress(null);
     setComposeOpen(true);
   };
 
   const handleCloseCompose = () => {
     setComposeOpen(false);
+    setActiveJobId(null);
+    setProgress(null);
   };
 
   const handleSendEmail = async () => {
@@ -197,10 +198,7 @@ export default function Emails() {
 
     try {
       const job = await createEmailJob({ subject: subject.trim(), body: body.trim() });
-      setComposeOpen(false);
-      setSnackbar({ open: true, message: 'Email job started! Processing in background...', severity: 'success' });
-
-      // Open progress dialog
+      // Start tracking progress in the same dialog
       setActiveJobId(job.id);
       setProgress({
         id: job.id,
@@ -210,7 +208,6 @@ export default function Emails() {
         failed_count: job.failed_count,
         progress_percent: job.progress_percent,
       });
-      setProgressOpen(true);
     } catch (err) {
       if (err instanceof PermissionError) {
         setFormError('You do not have permission to send emails');
@@ -222,11 +219,8 @@ export default function Emails() {
     }
   };
 
-  const handleCloseProgress = () => {
-    setProgressOpen(false);
-    setActiveJobId(null);
-    setProgress(null);
-  };
+  const isProcessing = progress && (progress.status === 'pending' || progress.status === 'processing');
+  const isComplete = progress && (progress.status === 'completed' || progress.status === 'failed');
 
   const handleViewDetail = async (jobId: number) => {
     setDetailLoading(true);
@@ -474,7 +468,7 @@ export default function Emails() {
       {/* Compose Dialog */}
       <Dialog
         open={composeOpen}
-        onClose={handleCloseCompose}
+        onClose={isProcessing ? undefined : handleCloseCompose}
         fullScreen={isMobile}
         maxWidth="md"
         fullWidth
@@ -482,7 +476,7 @@ export default function Emails() {
         <DialogTitle>
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <Typography variant="h6">Compose Email</Typography>
-            <IconButton onClick={handleCloseCompose} size="small">
+            <IconButton onClick={handleCloseCompose} size="small" disabled={!!isProcessing}>
               <Close />
             </IconButton>
           </Box>
@@ -504,6 +498,7 @@ export default function Emails() {
             onChange={(e) => setSubject(e.target.value)}
             sx={{ mb: 2 }}
             required
+            disabled={!!progress}
           />
           <TextField
             label="Message"
@@ -513,85 +508,56 @@ export default function Emails() {
             value={body}
             onChange={(e) => setBody(e.target.value)}
             required
+            disabled={!!progress}
           />
         </DialogContent>
-        <DialogActions sx={{ px: 3, pb: 2 }}>
-          <Button variant="outlined" onClick={handleCloseCompose} disabled={sending}>
-            Cancel
-          </Button>
-          <Button
-            variant="contained"
-            onClick={handleSendEmail}
-            disabled={sending || !subject.trim() || !body.trim()}
-            startIcon={sending ? <CircularProgress size={20} /> : <Send />}
-          >
-            {sending ? 'Sending...' : 'Send Email'}
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* Progress Dialog */}
-      <Dialog
-        open={progressOpen}
-        onClose={progress?.status === 'completed' || progress?.status === 'failed' ? handleCloseProgress : undefined}
-        maxWidth="sm"
-        fullWidth
-      >
-        <DialogTitle>
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <Typography variant="h6">Email Progress</Typography>
-            {(progress?.status === 'completed' || progress?.status === 'failed') && (
-              <IconButton onClick={handleCloseProgress} size="small">
-                <Close />
-              </IconButton>
+        <DialogActions sx={{ px: 3, pb: 2, justifyContent: 'space-between' }}>
+          {/* Progress status on the left */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            {isProcessing && (
+              <>
+                <CircularProgress size={20} />
+                <Typography variant="body2" color="text.secondary">
+                  Sending... {progress.sent_count}/{progress.total_recipients}
+                </Typography>
+              </>
+            )}
+            {progress?.status === 'completed' && (
+              <Typography variant="body2" color="success.main">
+                Sent {progress.sent_count} of {progress.total_recipients} emails
+                {progress.failed_count > 0 && ` (${progress.failed_count} failed)`}
+              </Typography>
+            )}
+            {progress?.status === 'failed' && (
+              <Typography variant="body2" color="error.main">
+                Failed to send emails
+              </Typography>
             )}
           </Box>
-        </DialogTitle>
-        <DialogContent>
-          {progress && (
-            <Box sx={{ py: 2 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <Chip
-                  label={progress.status}
-                  color={getStatusColor(progress.status) as any}
-                  sx={{ mr: 2 }}
-                />
-                {(progress.status === 'pending' || progress.status === 'processing') && (
-                  <CircularProgress size={20} />
-                )}
-              </Box>
-              <LinearProgress
-                variant="determinate"
-                value={progress.progress_percent}
-                sx={{ height: 10, borderRadius: 5, mb: 2 }}
-              />
-              <Typography variant="body1" sx={{ textAlign: 'center', mb: 2 }}>
-                {progress.progress_percent}% Complete
-              </Typography>
-              <Box sx={{ display: 'flex', justifyContent: 'space-around' }}>
-                <Box sx={{ textAlign: 'center' }}>
-                  <Typography variant="h4">{progress.total_recipients}</Typography>
-                  <Typography variant="body2" color="text.secondary">Total</Typography>
-                </Box>
-                <Box sx={{ textAlign: 'center' }}>
-                  <Typography variant="h4" color="success.main">{progress.sent_count}</Typography>
-                  <Typography variant="body2" color="text.secondary">Sent</Typography>
-                </Box>
-                <Box sx={{ textAlign: 'center' }}>
-                  <Typography variant="h4" color="error.main">{progress.failed_count}</Typography>
-                  <Typography variant="body2" color="text.secondary">Failed</Typography>
-                </Box>
-              </Box>
-            </Box>
-          )}
-        </DialogContent>
-        {(progress?.status === 'completed' || progress?.status === 'failed') && (
-          <DialogActions sx={{ px: 3, pb: 2 }}>
-            <Button onClick={handleCloseProgress} variant="contained">
-              Close
-            </Button>
-          </DialogActions>
-        )}
+          {/* Action buttons on the right */}
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            {!progress && (
+              <>
+                <Button variant="outlined" onClick={handleCloseCompose} disabled={sending}>
+                  Cancel
+                </Button>
+                <Button
+                  variant="contained"
+                  onClick={handleSendEmail}
+                  disabled={sending || !subject.trim() || !body.trim()}
+                  startIcon={sending ? <CircularProgress size={20} /> : <Send />}
+                >
+                  {sending ? 'Sending...' : 'Send Email'}
+                </Button>
+              </>
+            )}
+            {isComplete && (
+              <Button variant="outlined" onClick={handleCloseCompose}>
+                Close
+              </Button>
+            )}
+          </Box>
+        </DialogActions>
       </Dialog>
 
       {/* Detail Dialog */}
