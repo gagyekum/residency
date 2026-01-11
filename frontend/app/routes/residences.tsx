@@ -17,6 +17,7 @@ import {
   InputAdornment,
   Pagination,
   Snackbar,
+  Stack,
   Table,
   TableBody,
   TableCell,
@@ -604,9 +605,11 @@ export default function Residences() {
                 </Button>
               </Box>
               {phoneNumbers.map((phone, index) => (
-                <Box
+                <Stack
                   key={index}
-                  sx={{ display: 'flex', gap: 1, mb: 1, alignItems: 'center' }}
+                  direction="row"
+                  spacing={1}
+                  sx={{ mb: 1, alignItems: 'center' }}
                 >
                   <TextField
                     size="small"
@@ -635,7 +638,7 @@ export default function Residences() {
                   >
                     <Delete fontSize="small" />
                   </IconButton>
-                </Box>
+                </Stack>
               ))}
             </Box>
 
@@ -650,9 +653,11 @@ export default function Residences() {
                 </Button>
               </Box>
               {emailAddresses.map((email, index) => (
-                <Box
+                <Stack
                   key={index}
-                  sx={{ display: 'flex', gap: 1, mb: 1, alignItems: 'center' }}
+                  direction="row"
+                  spacing={1}
+                  sx={{ mb: 1, alignItems: 'center' }}
                 >
                   <TextField
                     size="small"
@@ -682,7 +687,7 @@ export default function Residences() {
                   >
                     <Delete fontSize="small" />
                   </IconButton>
-                </Box>
+                </Stack>
               ))}
             </Box>
           </DialogContent>
