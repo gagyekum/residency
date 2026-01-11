@@ -420,9 +420,9 @@ export default function Emails() {
           </Alert>
         ) : isMobile ? (
           // Mobile card view
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pb: 3 }}>
             {jobs.map((job) => (
-              <Card key={job.id} sx={{ cursor: 'pointer' }} onClick={() => handleViewDetail(job.id)}>
+              <Card key={job.id} variant="outlined" sx={{ cursor: 'pointer' }} onClick={() => handleViewDetail(job.id)}>
                 <CardContent>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
                     <Typography variant="subtitle1" sx={{ fontWeight: 500, flex: 1, mr: 1 }} noWrap>
