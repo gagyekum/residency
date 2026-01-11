@@ -130,3 +130,48 @@ class EmailJobViewSet(viewsets.ModelViewSet):
             'page': page,
             'results': serializer.data,
         })
+
+    @action(detail=True, methods=['post'])
+    def retry(self, request, pk=None):
+        """
+        Retry sending to failed recipients.
+        POST /api/v1/emails/{id}/retry/
+        """
+        job = self.get_object()
+
+        # Check if there are failed recipients
+        failed_count = job.recipients.filter(status=EmailRecipient.Status.FAILED).count()
+        if failed_count == 0:
+            return Response(
+                {'detail': 'No failed recipients to retry.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Reset failed recipients to pending
+        job.recipients.filter(status=EmailRecipient.Status.FAILED).update(
+            status=EmailRecipient.Status.PENDING,
+            error_message='',
+            sent_at=None,
+        )
+
+        # Update job counts and status
+        job.failed_count = 0
+        job.status = EmailJob.Status.PROCESSING
+        job.error_message = ''
+        job.completed_at = None
+        job.save(update_fields=['failed_count', 'status', 'error_message', 'completed_at'])
+
+        # Start background processing
+        start_email_job(job.id)
+
+        return Response({
+            'id': job.id,
+            'status': job.status,
+            'total_recipients': job.total_recipients,
+            'sent_count': job.sent_count,
+            'failed_count': job.failed_count,
+            'progress_percent': (
+                int((job.sent_count + job.failed_count) / job.total_recipients * 100)
+                if job.total_recipients > 0 else 0
+            ),
+        })

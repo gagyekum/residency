@@ -277,3 +277,9 @@ export async function createEmailJob(data: EmailJobInput): Promise<EmailJob> {
 export async function getEmailJobRecipients(jobId: number, page = 1): Promise<EmailRecipientsResponse> {
   return apiFetch<EmailRecipientsResponse>(`/emails/${jobId}/recipients/?page=${page}`);
 }
+
+export async function retryEmailJob(jobId: number): Promise<EmailJobStatus> {
+  return apiFetch<EmailJobStatus>(`/emails/${jobId}/retry/`, {
+    method: 'POST',
+  });
+}

@@ -37,6 +37,7 @@ import {
   Email,
   Home,
   Logout,
+  Refresh,
   Send,
   Visibility,
 } from '@mui/icons-material';
@@ -47,6 +48,7 @@ import {
   getEmailJobStatus,
   getEmailJobRecipients,
   createEmailJob,
+  retryEmailJob,
   getCurrentUser,
   hasPermission,
   PermissionError,
@@ -87,6 +89,8 @@ export default function Emails() {
   const [recipientsPage, setRecipientsPage] = useState(1);
   const [hasMoreRecipients, setHasMoreRecipients] = useState(false);
   const [loadingMoreRecipients, setLoadingMoreRecipients] = useState(false);
+  const [retryProgress, setRetryProgress] = useState<EmailJobStatus | null>(null);
+  const [retrying, setRetrying] = useState(false);
 
   // Snackbar state
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' as 'success' | 'error' });
@@ -264,12 +268,66 @@ export default function Emails() {
   };
 
   const handleCloseDetail = () => {
+    // Refresh list if we just retried
+    if (retryProgress) {
+      fetchJobs();
+    }
     setDetailOpen(false);
     setDetailJob(null);
     setRecipients([]);
     setRecipientsPage(1);
     setHasMoreRecipients(false);
+    setRetryProgress(null);
+    setRetrying(false);
   };
+
+  const handleRetryFailed = async () => {
+    if (!detailJob || retrying) return;
+    setRetrying(true);
+    try {
+      const status = await retryEmailJob(detailJob.id);
+      setRetryProgress(status);
+    } catch (err) {
+      setSnackbar({ open: true, message: 'Failed to retry emails', severity: 'error' });
+      setRetrying(false);
+    }
+  };
+
+  // Polling for retry progress (in detail dialog)
+  useEffect(() => {
+    if (!detailJob || !retryProgress || !detailOpen) return;
+
+    // Don't poll if already complete
+    if (retryProgress.status === 'completed' || retryProgress.status === 'failed') {
+      setRetrying(false);
+      // Refresh recipients to show updated statuses
+      getEmailJobRecipients(detailJob.id, 1).then((data) => {
+        setRecipients(data.results);
+        setRecipientsPage(1);
+        setHasMoreRecipients(data.next);
+      });
+      // Refresh job details
+      getEmailJob(detailJob.id).then((job) => {
+        setDetailJob(job);
+      });
+      return;
+    }
+
+    const pollStatus = async () => {
+      try {
+        const status = await getEmailJobStatus(detailJob.id);
+        setRetryProgress(status);
+      } catch (err) {
+        console.error('Failed to poll retry status:', err);
+      }
+    };
+
+    const pollInterval = setInterval(pollStatus, 2000);
+    return () => clearInterval(pollInterval);
+  }, [detailJob, retryProgress, detailOpen]);
+
+  const isRetryProcessing = retryProgress && (retryProgress.status === 'pending' || retryProgress.status === 'processing');
+  const isRetryComplete = retryProgress && (retryProgress.status === 'completed' || retryProgress.status === 'failed');
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -695,10 +753,40 @@ export default function Emails() {
             </Box>
           )}
         </DialogContent>
-        <DialogActions sx={{ px: 3, pb: 2 }}>
-          <Button onClick={handleCloseDetail} variant="contained">
-            Close
-          </Button>
+        <DialogActions sx={{ px: 3, pb: 2, justifyContent: 'space-between' }}>
+          {/* Retry progress on the left */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            {isRetryProcessing && (
+              <>
+                <CircularProgress size={20} />
+                <Typography variant="body2" color="text.secondary">
+                  Retrying... {retryProgress.sent_count}/{retryProgress.total_recipients}
+                </Typography>
+              </>
+            )}
+            {isRetryComplete && retryProgress.status === 'completed' && (
+              <Typography variant="body2" color="success.main">
+                Retry complete - {retryProgress.sent_count} sent
+                {retryProgress.failed_count > 0 && `, ${retryProgress.failed_count} still failed`}
+              </Typography>
+            )}
+          </Box>
+          {/* Action buttons on the right */}
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            {detailJob && detailJob.failed_count > 0 && !isRetryProcessing && canSend && (
+              <Button
+                variant="outlined"
+                onClick={handleRetryFailed}
+                disabled={retrying}
+                startIcon={retrying ? <CircularProgress size={20} /> : <Refresh />}
+              >
+                {retrying ? 'Starting...' : `Retry Failed (${detailJob.failed_count})`}
+              </Button>
+            )}
+            <Button onClick={handleCloseDetail} variant="contained" disabled={!!isRetryProcessing}>
+              Close
+            </Button>
+          </Box>
         </DialogActions>
       </Dialog>
 
