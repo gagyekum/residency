@@ -11,7 +11,7 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
-import { Email, Home as HomeIcon, Logout, NavigateNext } from '@mui/icons-material';
+import { Email, Logout, NavigateNext } from '@mui/icons-material';
 import { getStoredTokens, clearTokens } from '~/lib/auth';
 
 export default function Home() {
@@ -51,7 +51,6 @@ export default function Home() {
     <Box sx={{ flexGrow: 1, bgcolor: 'background.default', minHeight: '100vh' }}>
       <AppBar position="static">
         <Toolbar>
-          <HomeIcon sx={{ mr: 2 }} />
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
             Residency
           </Typography>

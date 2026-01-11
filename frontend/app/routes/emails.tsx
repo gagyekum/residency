@@ -34,7 +34,6 @@ import {
 import {
   ArrowBack,
   Close,
-  Email,
   Home,
   Logout,
   Refresh,
@@ -363,7 +362,6 @@ export default function Emails() {
               <ArrowBack />
             </IconButton>
           </Tooltip>
-          <Email sx={{ mr: 1, display: { xs: 'none', sm: 'block' } }} />
           <Typography variant="h6" component="div" sx={{ flexGrow: 1, fontSize: { xs: '1rem', sm: '1.25rem' } }}>
             Email Messaging
           </Typography>

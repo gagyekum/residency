@@ -372,7 +372,6 @@ export default function Residences() {
           >
             <ArrowBack />
           </IconButton>
-          <Home sx={{ mr: 1, display: { xs: 'none', sm: 'block' } }} />
           <Typography
             variant="h6"
             component="div"
