@@ -283,3 +283,21 @@ export async function retryEmailJob(jobId: number): Promise<EmailJobStatus> {
     method: 'POST',
   });
 }
+
+// Dashboard types and API
+export interface DashboardStats {
+  residences: {
+    total: number;
+    with_email: number;
+  };
+  emails: {
+    total_jobs: number;
+    completed_jobs: number;
+    total_sent: number;
+    total_failed: number;
+  };
+}
+
+export async function getDashboard(): Promise<DashboardStats> {
+  return apiFetch<DashboardStats>('/users/dashboard/');
+}

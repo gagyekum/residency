@@ -4,19 +4,26 @@ import {
   AppBar,
   Box,
   Button,
+  Card,
+  CardContent,
   CircularProgress,
   Container,
+  Grid,
   IconButton,
   Toolbar,
   Tooltip,
   Typography,
 } from '@mui/material';
-import { Email, Logout, NavigateNext } from '@mui/icons-material';
+import { Email, Logout, NavigateNext, Home as HomeIcon } from '@mui/icons-material';
 import { getStoredTokens, clearTokens } from '~/lib/auth';
+import { getDashboard } from '~/lib/api';
+import type { DashboardStats } from '~/lib/api';
 
 export default function Home() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [statsLoading, setStatsLoading] = useState(true);
 
   useEffect(() => {
     const tokens = getStoredTokens();
@@ -24,8 +31,20 @@ export default function Home() {
       navigate('/login');
     } else {
       setLoading(false);
+      fetchDashboard();
     }
   }, [navigate]);
+
+  const fetchDashboard = async () => {
+    try {
+      const data = await getDashboard();
+      setStats(data);
+    } catch (error) {
+      console.error('Failed to fetch dashboard:', error);
+    } finally {
+      setStatsLoading(false);
+    }
+  };
 
   const handleLogout = () => {
     clearTokens();
@@ -80,7 +99,7 @@ export default function Home() {
             Manage your residences, tenants, and property information
           </Typography>
 
-          <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2, justifyContent: 'center' }}>
+          <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2, justifyContent: 'center', mb: { xs: 4, sm: 6 } }}>
             <Button
               variant="contained"
               size="large"
@@ -100,6 +119,87 @@ export default function Home() {
               Email Messaging
             </Button>
           </Box>
+
+          {/* Dashboard Stats */}
+          {statsLoading ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+              <CircularProgress size={32} />
+            </Box>
+          ) : stats ? (
+            <Grid container spacing={2}>
+              {/* Residences Card */}
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <Card variant="outlined">
+                  <CardContent>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                      <HomeIcon color="primary" />
+                      <Typography variant="h6" component="h2">
+                        Residences
+                      </Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <Box sx={{ textAlign: 'center', flex: 1 }}>
+                        <Typography variant="h4" color="primary">
+                          {stats.residences.total}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          Total
+                        </Typography>
+                      </Box>
+                      <Box sx={{ textAlign: 'center', flex: 1 }}>
+                        <Typography variant="h4" color="success.main">
+                          {stats.residences.with_email}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          With Email
+                        </Typography>
+                      </Box>
+                    </Box>
+                  </CardContent>
+                </Card>
+              </Grid>
+
+              {/* Emails Card */}
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <Card variant="outlined">
+                  <CardContent>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                      <Email color="primary" />
+                      <Typography variant="h6" component="h2">
+                        Email Campaigns
+                      </Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <Box sx={{ textAlign: 'center', flex: 1 }}>
+                        <Typography variant="h4" color="primary">
+                          {stats.emails.total_jobs}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          Total Jobs
+                        </Typography>
+                      </Box>
+                      <Box sx={{ textAlign: 'center', flex: 1 }}>
+                        <Typography variant="h4" color="success.main">
+                          {stats.emails.total_sent}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          Sent
+                        </Typography>
+                      </Box>
+                      <Box sx={{ textAlign: 'center', flex: 1 }}>
+                        <Typography variant="h4" color="error.main">
+                          {stats.emails.total_failed}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          Failed
+                        </Typography>
+                      </Box>
+                    </Box>
+                  </CardContent>
+                </Card>
+              </Grid>
+            </Grid>
+          ) : null}
         </Box>
       </Container>
     </Box>
