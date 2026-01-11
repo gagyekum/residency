@@ -48,6 +48,7 @@ INSTALLED_APPS = [
 
     'apps.users',
     'apps.residences',
+    'apps.emails',
 ]
 
 MIDDLEWARE = [
@@ -189,3 +190,17 @@ CORS_ALLOW_HEADERS = [
 
 # Allow Private Network Access (for ngrok -> localhost during development)
 CORS_ALLOW_PRIVATE_NETWORK = True
+
+# Email Configuration
+EMAIL_BACKEND = os.environ.get(
+    'EMAIL_BACKEND',
+    'django.core.mail.backends.console.EmailBackend'  # Console for dev
+)
+EMAIL_HOST = os.environ.get('EMAIL_HOST', 'localhost')
+EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 25))
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
+EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'False').lower() == 'true'
+EMAIL_USE_SSL = os.environ.get('EMAIL_USE_SSL', 'False').lower() == 'true'
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'noreply@example.com')
+RESIDENCE_FROM_EMAIL = os.environ.get('RESIDENCE_FROM_EMAIL', DEFAULT_FROM_EMAIL)

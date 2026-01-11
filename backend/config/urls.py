@@ -22,6 +22,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/v1/users/', include('apps.users.urls')),
     path('api/v1/residences/', include('apps.residences.urls')),
+    path('api/v1/emails/', include('apps.emails.urls')),
 ]
 
 # In development, proxy all other requests to Vite dev server

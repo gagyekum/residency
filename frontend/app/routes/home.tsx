@@ -11,7 +11,7 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
-import { Home as HomeIcon, Logout, NavigateNext } from '@mui/icons-material';
+import { Email, Home as HomeIcon, Logout, NavigateNext } from '@mui/icons-material';
 import { getStoredTokens, clearTokens } from '~/lib/auth';
 
 export default function Home() {
@@ -81,15 +81,26 @@ export default function Home() {
             Manage your residences, tenants, and property information
           </Typography>
 
-          <Button
-            variant="contained"
-            size="large"
-            endIcon={<NavigateNext />}
-            onClick={() => navigate('/residences')}
-            sx={{ py: 1.5, px: 4 }}
-          >
-            Go to Residences
-          </Button>
+          <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2, justifyContent: 'center' }}>
+            <Button
+              variant="contained"
+              size="large"
+              endIcon={<NavigateNext />}
+              onClick={() => navigate('/residences')}
+              sx={{ py: 1.5, px: 4 }}
+            >
+              Go to Residences
+            </Button>
+            <Button
+              variant="outlined"
+              size="large"
+              endIcon={<Email />}
+              onClick={() => navigate('/emails')}
+              sx={{ py: 1.5, px: 4 }}
+            >
+              Email Messaging
+            </Button>
+          </Box>
         </Box>
       </Container>
     </Box>

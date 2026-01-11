@@ -184,3 +184,86 @@ export async function deleteResidence(id: number): Promise<void> {
     method: 'DELETE',
   });
 }
+
+// Email permissions
+export const EMAIL_PERMISSIONS = {
+  view: 'emails.view_emailjob',
+  add: 'emails.add_emailjob',
+} as const;
+
+// Email types
+export interface EmailRecipient {
+  id: number;
+  residence: number;
+  residence_name: string;
+  house_number: string;
+  email_address: string;
+  status: 'pending' | 'sent' | 'failed';
+  error_message: string;
+  sent_at: string | null;
+}
+
+export interface EmailJob {
+  id: number;
+  subject: string;
+  body: string;
+  sender: number;
+  sender_email: string;
+  status: 'pending' | 'processing' | 'completed' | 'failed';
+  total_recipients: number;
+  sent_count: number;
+  failed_count: number;
+  error_message: string;
+  created_at: string;
+  started_at: string | null;
+  completed_at: string | null;
+  recipients: EmailRecipient[];
+  progress_percent: number;
+}
+
+export interface EmailJobListItem {
+  id: number;
+  subject: string;
+  sender_email: string;
+  status: 'pending' | 'processing' | 'completed' | 'failed';
+  total_recipients: number;
+  sent_count: number;
+  failed_count: number;
+  created_at: string;
+  completed_at: string | null;
+  progress_percent: number;
+}
+
+export interface EmailJobInput {
+  subject: string;
+  body: string;
+}
+
+export interface EmailJobStatus {
+  id: number;
+  status: string;
+  total_recipients: number;
+  sent_count: number;
+  failed_count: number;
+  progress_percent: number;
+}
+
+// Email API functions
+export async function getEmailJobs(page = 1): Promise<PaginatedResponse<EmailJobListItem>> {
+  return apiFetch<PaginatedResponse<EmailJobListItem>>(`/emails/?page=${page}`);
+}
+
+export async function getEmailJob(id: number): Promise<EmailJob> {
+  return apiFetch<EmailJob>(`/emails/${id}/`);
+}
+
+export async function getEmailJobStatus(id: number): Promise<EmailJobStatus> {
+  return apiFetch<EmailJobStatus>(`/emails/${id}/status/`);
+}
+
+export async function createEmailJob(data: EmailJobInput): Promise<EmailJob> {
+  return apiFetch<EmailJob>('/emails/', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
