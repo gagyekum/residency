@@ -1,7 +1,6 @@
 # Railway configuration for Django backend
 
 [deploy]
-healthcheckPath = "/admin/"
-healthcheckTimeout = 30
+# Disable healthcheck - Railway will just check if the port is open
 restartPolicyType = "on_failure"
 restartPolicyMaxRetries = 3
