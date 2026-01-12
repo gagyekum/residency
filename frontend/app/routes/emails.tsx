@@ -40,6 +40,7 @@ import {
   Refresh,
   Send,
   Visibility,
+  MailOutline,
 } from '@mui/icons-material';
 import { getStoredTokens, clearTokens } from '~/lib/auth';
 import {
@@ -416,9 +417,22 @@ export default function Emails() {
             <CircularProgress />
           </Box>
         ) : jobs.length === 0 ? (
-          <Alert severity="info">
-            No email jobs found. {canSend ? 'Click "Compose" to send your first email.' : ''}
-          </Alert>
+          <Box sx={{ textAlign: 'center', py: { xs: 6, sm: 10 } }}>
+            <MailOutline sx={{ fontSize: { xs: 48, sm: 64 }, color: 'grey.400', mb: 2 }} />
+            <Typography variant="h6" color="text.secondary">
+              No emails sent yet
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+              {canSend
+                ? 'Get started by composing your first email'
+                : 'No email history available'}
+            </Typography>
+            {canSend && (
+              <Button variant="contained" startIcon={<Send />} onClick={handleOpenCompose}>
+                Compose Email
+              </Button>
+            )}
+          </Box>
         ) : isMobile ? (
           // Mobile card view
           <Stack spacing={2} sx={{ pb: 3 }}>
