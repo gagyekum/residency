@@ -7,11 +7,18 @@ from django.core.management.base import BaseCommand
 class Command(BaseCommand):
     help = 'Create or update superuser from environment variables'
 
-    def handle(self, *args, **options):
+    def handle(self, *_, **__):
+        self.stdout.write('=== Running ensure_superuser ===')
+
         User = get_user_model()
         email = os.environ.get('DJANGO_SUPERUSER_EMAIL')
         password = os.environ.get('DJANGO_SUPERUSER_PASSWORD')
         username = os.environ.get('DJANGO_SUPERUSER_USERNAME')
+
+        # Debug: show which vars are set (not values for security)
+        self.stdout.write(f'  DJANGO_SUPERUSER_EMAIL: {"set" if email else "NOT SET"}')
+        self.stdout.write(f'  DJANGO_SUPERUSER_PASSWORD: {"set" if password else "NOT SET"}')
+        self.stdout.write(f'  DJANGO_SUPERUSER_USERNAME: {"set" if username else "NOT SET"}')
 
         if not all([email, password, username]):
             self.stdout.write(
@@ -36,10 +43,8 @@ class Command(BaseCommand):
         user.set_password(password)
         user.save()
 
-        if created:
-            self.stdout.write(self.style.SUCCESS(f'Superuser created: {email}'))
-        else:
-            self.stdout.write(self.style.SUCCESS(f'Superuser updated: {email}'))
+        action_performed = "created" if created else "updated"
+        self.stdout.write(self.style.SUCCESS(f'Superuser {action_performed}: {email}'))
 
         self.stdout.write(f'  Username: {user.username}')
         self.stdout.write(f'  is_staff: {user.is_staff}')
