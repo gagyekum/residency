@@ -27,6 +27,13 @@ export const links: Route.LinksFunction = () => [
 ];
 
 export function Layout({ children }: { children: React.ReactNode }) {
+  // Get ENV from server - this runs on both server and client
+  const env = {
+    API_URL: typeof process !== 'undefined'
+      ? (process.env.VITE_API_URL || process.env.API_URL || '/api/v1')
+      : '/api/v1',
+  };
+
   return (
     <html lang="en">
       <head>
@@ -36,6 +43,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `window.ENV = ${JSON.stringify(env)}`,
+          }}
+        />
         {children}
         <ScrollRestoration />
         <Scripts />

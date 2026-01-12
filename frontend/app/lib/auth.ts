@@ -1,4 +1,4 @@
-import { API_URL } from './config';
+import { getApiUrl } from './config';
 
 export interface AuthTokens {
   access: string;
@@ -11,7 +11,7 @@ export interface LoginCredentials {
 }
 
 export async function login(credentials: LoginCredentials): Promise<AuthTokens> {
-  const response = await fetch(`${API_URL}/users/token/`, {
+  const response = await fetch(`${getApiUrl()}/users/token/`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -28,7 +28,7 @@ export async function login(credentials: LoginCredentials): Promise<AuthTokens> 
 }
 
 export async function refreshToken(refresh: string): Promise<AuthTokens> {
-  const response = await fetch(`${API_URL}/users/token/refresh/`, {
+  const response = await fetch(`${getApiUrl()}/users/token/refresh/`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

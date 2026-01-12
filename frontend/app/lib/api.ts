@@ -1,5 +1,5 @@
 import { getStoredTokens, refreshToken, storeTokens, clearTokens, isTokenExpired } from './auth';
-import { API_URL } from './config';
+import { getApiUrl } from './config';
 
 // Custom error class for permission errors
 export class PermissionError extends Error {
@@ -43,7 +43,7 @@ export async function apiFetch<T>(
     throw new Error('Not authenticated');
   }
 
-  const response = await fetch(`${API_URL}${endpoint}`, {
+  const response = await fetch(`${getApiUrl()}${endpoint}`, {
     ...options,
     headers: {
       'Content-Type': 'application/json',
