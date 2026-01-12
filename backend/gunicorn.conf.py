@@ -1,11 +1,11 @@
-import multiprocessing
 import os
 
 # Bind to PORT environment variable or default to 8000
 bind = f"0.0.0.0:{os.environ.get('PORT', '8000')}"
 
-# Workers
-workers = int(os.environ.get('WEB_CONCURRENCY', multiprocessing.cpu_count() * 2 + 1))
+# Workers - default to 2 for containerized environments (Railway, etc.)
+# multiprocessing.cpu_count() returns host CPU count, not container allocation
+workers = int(os.environ.get('WEB_CONCURRENCY', 2))
 worker_class = 'sync'
 worker_connections = 1000
 timeout = 30
