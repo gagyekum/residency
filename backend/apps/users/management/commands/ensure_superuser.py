@@ -29,6 +29,10 @@ class Command(BaseCommand):
                 'is_superuser': True,
             }
         )
+
+        # Always ensure superuser privileges and update password
+        user.is_staff = True
+        user.is_superuser = True
         user.set_password(password)
         user.save()
 
@@ -36,3 +40,7 @@ class Command(BaseCommand):
             self.stdout.write(self.style.SUCCESS(f'Superuser created: {email}'))
         else:
             self.stdout.write(self.style.SUCCESS(f'Superuser updated: {email}'))
+
+        self.stdout.write(f'  Username: {user.username}')
+        self.stdout.write(f'  is_staff: {user.is_staff}')
+        self.stdout.write(f'  is_superuser: {user.is_superuser}')
