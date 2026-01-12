@@ -1,5 +1,4 @@
-// API URL - uses environment variable in production, relative URL in development
-const API_URL = import.meta.env.VITE_API_URL || '/api/v1';
+import { API_URL } from './config';
 
 export interface AuthTokens {
   access: string;

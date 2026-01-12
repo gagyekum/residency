@@ -1,7 +1,5 @@
 import { getStoredTokens, refreshToken, storeTokens, clearTokens, isTokenExpired } from './auth';
-
-// API URL - uses environment variable in production, relative URL in development
-const API_URL = import.meta.env.VITE_API_URL || '/api/v1';
+import { API_URL } from './config';
 
 // Custom error class for permission errors
 export class PermissionError extends Error {
