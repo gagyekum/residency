@@ -8,7 +8,7 @@ class Command(BaseCommand):
     help = 'Create or update superuser from environment variables'
 
     def handle(self, *_, **__):
-        self.stdout.write('=== Running ensure_superuser ===')
+        print('=== Running ensure_superuser ===', flush=True)
 
         User = get_user_model()
         email = os.environ.get('DJANGO_SUPERUSER_EMAIL')
@@ -16,16 +16,12 @@ class Command(BaseCommand):
         username = os.environ.get('DJANGO_SUPERUSER_USERNAME')
 
         # Debug: show which vars are set (not values for security)
-        self.stdout.write(f'  DJANGO_SUPERUSER_EMAIL: {"set" if email else "NOT SET"}')
-        self.stdout.write(f'  DJANGO_SUPERUSER_PASSWORD: {"set" if password else "NOT SET"}')
-        self.stdout.write(f'  DJANGO_SUPERUSER_USERNAME: {"set" if username else "NOT SET"}')
+        print(f'  DJANGO_SUPERUSER_EMAIL: {"set" if email else "NOT SET"}', flush=True)
+        print(f'  DJANGO_SUPERUSER_PASSWORD: {"set" if password else "NOT SET"}', flush=True)
+        print(f'  DJANGO_SUPERUSER_USERNAME: {"set" if username else "NOT SET"}', flush=True)
 
         if not all([email, password, username]):
-            self.stdout.write(
-                self.style.WARNING('Missing superuser environment variables. Required: '
-                                   'DJANGO_SUPERUSER_EMAIL, DJANGO_SUPERUSER_PASSWORD, '
-                                   'DJANGO_SUPERUSER_USERNAME')
-            )
+            print('WARNING: Missing superuser environment variables', flush=True)
             return
 
         user, created = User.objects.get_or_create(
@@ -43,9 +39,8 @@ class Command(BaseCommand):
         user.set_password(password)
         user.save()
 
-        action_performed = "created" if created else "updated"
-        self.stdout.write(self.style.SUCCESS(f'Superuser {action_performed}: {email}'))
-
-        self.stdout.write(f'  Username: {user.username}')
-        self.stdout.write(f'  is_staff: {user.is_staff}')
-        self.stdout.write(f'  is_superuser: {user.is_superuser}')
+        action = "created" if created else "updated"
+        print(f'Superuser {action}: {email}', flush=True)
+        print(f'  Username: {user.username}', flush=True)
+        print(f'  is_staff: {user.is_staff}', flush=True)
+        print(f'  is_superuser: {user.is_superuser}', flush=True)
