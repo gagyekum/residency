@@ -355,7 +355,7 @@ export default function Emails() {
   }
 
   return (
-    <Box sx={{ flexGrow: 1, bgcolor: 'background.default', minHeight: '100vh' }}>
+    <Box sx={{ flexGrow: 1, bgcolor: 'background.default', minHeight: '100vh', pb: 'env(safe-area-inset-bottom)' }}>
       <AppHeader>
         <Tooltip title="Back to Home">
           <IconButton color="inherit" onClick={() => navigate('/')} edge="start" sx={{ mr: 1 }}>

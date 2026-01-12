@@ -7,9 +7,19 @@
 
 html,
 body {
-  @apply bg-white dark:bg-gray-950;
+  /* Use MUI's background color for consistency */
+  background-color: #ffffff;
+  /* Ensure full height on mobile Safari */
+  min-height: 100vh;
+  min-height: -webkit-fill-available;
+}
 
-  @media (prefers-color-scheme: dark) {
-    color-scheme: dark;
+/* Ensure safe area background on iOS */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  body::after {
+    content: '';
+    display: block;
+    height: env(safe-area-inset-bottom);
+    background-color: #ffffff;
   }
 }

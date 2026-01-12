@@ -44,6 +44,7 @@ export default function Login() {
         justifyContent: 'center',
         bgcolor: 'background.default',
         px: { xs: 2, sm: 0 },
+        pb: 'env(safe-area-inset-bottom)',
       }}
     >
       <Container maxWidth="xs" disableGutters sx={{ width: '100%' }}>

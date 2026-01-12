@@ -363,7 +363,7 @@ export default function Residences() {
   };
 
   return (
-    <Box sx={{ flexGrow: 1, bgcolor: 'background.default', minHeight: '100vh' }}>
+    <Box sx={{ flexGrow: 1, bgcolor: 'background.default', minHeight: '100vh', pb: 'env(safe-area-inset-bottom)' }}>
       <AppHeader>
         <IconButton
           color="inherit"
