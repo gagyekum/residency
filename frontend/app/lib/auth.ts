@@ -1,5 +1,5 @@
-// Use relative URL - works when proxied through Django
-const API_URL = '/api/v1';
+// API URL - uses environment variable in production, relative URL in development
+const API_URL = import.meta.env.VITE_API_URL || '/api/v1';
 
 export interface AuthTokens {
   access: string;
