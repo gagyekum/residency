@@ -2,7 +2,6 @@ import { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router';
 import {
   Alert,
-  AppBar,
   Box,
   Button,
   Card,
@@ -26,12 +25,12 @@ import {
   TableHead,
   TableRow,
   TextField,
-  Toolbar,
   Tooltip,
   Typography,
   useMediaQuery,
   useTheme,
 } from '@mui/material';
+import AppHeader from '~/components/AppHeader';
 import {
   ArrowBack,
   Close,
@@ -357,49 +356,47 @@ export default function Emails() {
 
   return (
     <Box sx={{ flexGrow: 1, bgcolor: 'background.default', minHeight: '100vh' }}>
-      <AppBar position="static">
-        <Toolbar>
-          <Tooltip title="Back to Home">
-            <IconButton color="inherit" onClick={() => navigate('/')} edge="start" sx={{ mr: 1 }}>
-              <ArrowBack />
-            </IconButton>
-          </Tooltip>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1, fontSize: { xs: '1rem', sm: '1.25rem' } }}>
-            Email Messaging
-          </Typography>
-          {canSend && (
-            <Button
+      <AppHeader>
+        <Tooltip title="Back to Home">
+          <IconButton color="inherit" onClick={() => navigate('/')} edge="start" sx={{ mr: 1 }}>
+            <ArrowBack />
+          </IconButton>
+        </Tooltip>
+        <Typography variant="h6" component="div" sx={{ flexGrow: 1, fontSize: { xs: '1rem', sm: '1.25rem' } }}>
+          Email Messaging
+        </Typography>
+        {canSend && (
+          <Button
+            color="inherit"
+            startIcon={<Send />}
+            onClick={handleOpenCompose}
+            sx={{ mr: 1, display: { xs: 'none', sm: 'flex' } }}
+          >
+            Compose
+          </Button>
+        )}
+        {canSend && (
+          <Tooltip title="Compose Email">
+            <IconButton
               color="inherit"
-              startIcon={<Send />}
               onClick={handleOpenCompose}
-              sx={{ mr: 1, display: { xs: 'none', sm: 'flex' } }}
+              sx={{ mr: 1, display: { xs: 'flex', sm: 'none' } }}
             >
-              Compose
-            </Button>
-          )}
-          {canSend && (
-            <Tooltip title="Compose Email">
-              <IconButton
-                color="inherit"
-                onClick={handleOpenCompose}
-                sx={{ mr: 1, display: { xs: 'flex', sm: 'none' } }}
-              >
-                <Send />
-              </IconButton>
-            </Tooltip>
-          )}
-          <Tooltip title="Home">
-            <IconButton color="inherit" onClick={() => navigate('/')}>
-              <Home />
+              <Send />
             </IconButton>
           </Tooltip>
-          <Tooltip title="Logout">
-            <IconButton color="inherit" onClick={handleLogout}>
-              <Logout />
-            </IconButton>
-          </Tooltip>
-        </Toolbar>
-      </AppBar>
+        )}
+        <Tooltip title="Home">
+          <IconButton color="inherit" onClick={() => navigate('/')}>
+            <Home />
+          </IconButton>
+        </Tooltip>
+        <Tooltip title="Logout">
+          <IconButton color="inherit" onClick={handleLogout}>
+            <Logout />
+          </IconButton>
+        </Tooltip>
+      </AppHeader>
 
       <Container maxWidth="lg" sx={{ mt: { xs: 2, sm: 4 }, px: { xs: 1, sm: 3 } }}>
         <Typography variant="h5" sx={{ mb: 3, fontSize: { xs: '1.25rem', sm: '1.5rem' } }}>

@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import {
-  AppBar,
   Box,
   Button,
   Card,
@@ -10,10 +9,10 @@ import {
   Container,
   Grid,
   IconButton,
-  Toolbar,
   Tooltip,
   Typography,
 } from '@mui/material';
+import AppHeader from '~/components/AppHeader';
 import { Email, Logout, NavigateNext, Home as HomeIcon } from '@mui/icons-material';
 import { getStoredTokens, clearTokens } from '~/lib/auth';
 import { getDashboard } from '~/lib/api';
@@ -68,18 +67,16 @@ export default function Home() {
 
   return (
     <Box sx={{ flexGrow: 1, bgcolor: 'background.default', minHeight: '100vh' }}>
-      <AppBar position="static">
-        <Toolbar>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            Residency
-          </Typography>
-          <Tooltip title="Logout">
-            <IconButton color="inherit" onClick={handleLogout}>
-              <Logout />
-            </IconButton>
-          </Tooltip>
-        </Toolbar>
-      </AppBar>
+      <AppHeader>
+        <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+          Residency
+        </Typography>
+        <Tooltip title="Logout">
+          <IconButton color="inherit" onClick={handleLogout}>
+            <Logout />
+          </IconButton>
+        </Tooltip>
+      </AppHeader>
 
       <Container maxWidth="sm" sx={{ mt: { xs: 6, sm: 10 }, px: { xs: 2, sm: 3 } }}>
         <Box sx={{ textAlign: 'center' }}>

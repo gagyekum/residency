@@ -31,6 +31,7 @@ import {
   useMediaQuery,
   useTheme,
 } from '@mui/material';
+import AppHeader from '~/components/AppHeader';
 import {
   Add,
   ArrowBack,
@@ -363,44 +364,42 @@ export default function Residences() {
 
   return (
     <Box sx={{ flexGrow: 1, bgcolor: 'background.default', minHeight: '100vh' }}>
-      <AppBar position="static">
-        <Toolbar>
-          <IconButton
-            color="inherit"
-            edge="start"
-            onClick={() => navigate('/')}
-            sx={{ mr: 1 }}
-          >
-            <ArrowBack />
+      <AppHeader>
+        <IconButton
+          color="inherit"
+          edge="start"
+          onClick={() => navigate('/')}
+          sx={{ mr: 1 }}
+        >
+          <ArrowBack />
+        </IconButton>
+        <Typography
+          variant="h6"
+          component="div"
+          sx={{ flexGrow: 1, fontSize: { xs: '1rem', sm: '1.25rem' } }}
+        >
+          {isMobile ? 'Residences' : 'Residency Management'}
+        </Typography>
+        {canAdd && (isMobile ? (
+          <IconButton color="inherit" onClick={handleOpenCreateDialog}>
+            <Add />
           </IconButton>
-          <Typography
-            variant="h6"
-            component="div"
-            sx={{ flexGrow: 1, fontSize: { xs: '1rem', sm: '1.25rem' } }}
+        ) : (
+          <Button
+            color="inherit"
+            startIcon={<Add />}
+            sx={{ mr: 2 }}
+            onClick={handleOpenCreateDialog}
           >
-            {isMobile ? 'Residences' : 'Residency Management'}
-          </Typography>
-          {canAdd && (isMobile ? (
-            <IconButton color="inherit" onClick={handleOpenCreateDialog}>
-              <Add />
-            </IconButton>
-          ) : (
-            <Button
-              color="inherit"
-              startIcon={<Add />}
-              sx={{ mr: 2 }}
-              onClick={handleOpenCreateDialog}
-            >
-              Add Residence
-            </Button>
-          ))}
-          <Tooltip title="Logout">
-            <IconButton color="inherit" onClick={handleLogout}>
-              <Logout />
-            </IconButton>
-          </Tooltip>
-        </Toolbar>
-      </AppBar>
+            Add Residence
+          </Button>
+        ))}
+        <Tooltip title="Logout">
+          <IconButton color="inherit" onClick={handleLogout}>
+            <Logout />
+          </IconButton>
+        </Tooltip>
+      </AppHeader>
 
       <Container maxWidth="lg" sx={{ mt: { xs: 2, sm: 4 }, mb: 4, px: { xs: 2, sm: 3 } }}>
         {/* Search Bar - only show if there are residences or user is searching */}
