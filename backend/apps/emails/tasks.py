@@ -38,7 +38,9 @@ def process_email_job(job_id):
         job.started_at = timezone.now()
         job.save(update_fields=['status', 'started_at'])
 
-        from_email = getattr(settings, 'RESIDENCE_FROM_EMAIL', settings.DEFAULT_FROM_EMAIL)
+        display_name = getattr(settings, 'DEFAULT_FROM_EMAIL_DISPLAY_NAME', 'Residency Administrator')
+        email_address = settings.DEFAULT_FROM_EMAIL
+        from_email = f'{display_name} <{email_address}>'
 
         for recipient in job.recipients.filter(status=EmailRecipient.Status.PENDING):
             try:

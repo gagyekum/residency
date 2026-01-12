@@ -53,7 +53,7 @@ This guide explains how to deploy Residency to Railway with two services: Django
    | `CORS_ALLOWED_ORIGINS` | `https://<frontend-domain>.railway.app` (add after frontend is deployed) |
    | `DATABASE_URL` | `${{Postgres.DATABASE_URL}}` (Railway auto-links this) |
    | `EMAIL_BACKEND` | `django.core.mail.backends.console.EmailBackend` (or configure SMTP) |
-   | `RESIDENCE_FROM_EMAIL` | `noreply@yourdomain.com` |
+   | `DEFAULT_FROM_EMAIL` | `noreply@yourdomain.com` |
 
 5. Generate a public domain:
    - Go to **Settings** → **Networking**
@@ -117,8 +117,8 @@ CORS_ALLOWED_ORIGINS = https://<frontend-domain>.railway.app
 | `EMAIL_HOST_USER` | SMTP username | - |
 | `EMAIL_HOST_PASSWORD` | SMTP password | - |
 | `EMAIL_USE_TLS` | Use TLS | `true` |
-| `DEFAULT_FROM_EMAIL` | Default sender | `noreply@example.com` |
-| `RESIDENCE_FROM_EMAIL` | Residence emails sender | Same as DEFAULT_FROM_EMAIL |
+| `DEFAULT_FROM_EMAIL` | Default sender email | `noreply@example.com` |
+| `DEFAULT_FROM_EMAIL_DISPLAY_NAME` | Sender display name | `Residency Administrator` |
 | `WEB_CONCURRENCY` | Gunicorn workers | Auto-calculated |
 | `LOG_LEVEL` | Logging level | `info` |
 
