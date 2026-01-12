@@ -119,6 +119,8 @@ CORS_ALLOWED_ORIGINS = https://<frontend-domain>.railway.app
 | `EMAIL_USE_TLS` | Use TLS | `true` |
 | `DEFAULT_FROM_EMAIL` | Default sender email | `noreply@example.com` |
 | `DEFAULT_FROM_EMAIL_DISPLAY_NAME` | Sender display name | `Residency Administrator` |
+| `EMAIL_BATCH_SIZE` | Emails per batch | `50` |
+| `EMAIL_BATCH_DELAY` | Seconds between batches | `1.0` |
 | `WEB_CONCURRENCY` | Gunicorn workers | Auto-calculated |
 | `LOG_LEVEL` | Logging level | `info` |
 

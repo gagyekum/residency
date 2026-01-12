@@ -204,3 +204,7 @@ EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'False').lower() == 'true'
 EMAIL_USE_SSL = os.environ.get('EMAIL_USE_SSL', 'False').lower() == 'true'
 DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'noreply@example.com')
 DEFAULT_FROM_EMAIL_DISPLAY_NAME = os.environ.get('DEFAULT_FROM_EMAIL_DISPLAY_NAME', 'Residency Administrator')
+
+# Email batch processing settings
+EMAIL_BATCH_SIZE = int(os.environ.get('EMAIL_BATCH_SIZE', 50))
+EMAIL_BATCH_DELAY = float(os.environ.get('EMAIL_BATCH_DELAY', 1.0))  # seconds between batches
