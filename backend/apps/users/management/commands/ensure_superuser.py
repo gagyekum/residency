@@ -8,20 +8,13 @@ class Command(BaseCommand):
     help = 'Create or update superuser from environment variables'
 
     def handle(self, *_, **__):
-        print('=== Running ensure_superuser ===', flush=True)
-
         User = get_user_model()
         email = os.environ.get('DJANGO_SUPERUSER_EMAIL')
         password = os.environ.get('DJANGO_SUPERUSER_PASSWORD')
         username = os.environ.get('DJANGO_SUPERUSER_USERNAME')
 
-        # Debug: show which vars are set (not values for security)
-        print(f'  DJANGO_SUPERUSER_EMAIL: {"set" if email else "NOT SET"}', flush=True)
-        print(f'  DJANGO_SUPERUSER_PASSWORD: {"set" if password else "NOT SET"}', flush=True)
-        print(f'  DJANGO_SUPERUSER_USERNAME: {"set" if username else "NOT SET"}', flush=True)
-
         if not all([email, password, username]):
-            print('WARNING: Missing superuser environment variables', flush=True)
+            self.stderr.write(self.style.WARNING('ensure_superuser: Skipping - missing env vars'))
             return
 
         user, created = User.objects.get_or_create(
@@ -40,7 +33,4 @@ class Command(BaseCommand):
         user.save()
 
         action = "created" if created else "updated"
-        print(f'Superuser {action}: {email}', flush=True)
-        print(f'  Username: {user.username}', flush=True)
-        print(f'  is_staff: {user.is_staff}', flush=True)
-        print(f'  is_superuser: {user.is_superuser}', flush=True)
+        self.stdout.write(self.style.SUCCESS(f'ensure_superuser: {action} {email}'))
