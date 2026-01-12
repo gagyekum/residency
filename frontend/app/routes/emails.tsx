@@ -31,6 +31,7 @@ import {
   useTheme,
 } from '@mui/material';
 import AppHeader from '~/components/AppHeader';
+import Footer from '~/components/Footer';
 import {
   ArrowBack,
   Close,
@@ -355,7 +356,7 @@ export default function Emails() {
   }
 
   return (
-    <Box sx={{ flexGrow: 1, bgcolor: 'background.default', minHeight: '100vh', pb: 'env(safe-area-inset-bottom)' }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', bgcolor: 'background.default', minHeight: '100vh', pb: 'env(safe-area-inset-bottom)' }}>
       <AppHeader>
         <Tooltip title="Back to Home">
           <IconButton color="inherit" onClick={() => navigate('/')} edge="start" sx={{ mr: 1 }}>
@@ -535,6 +536,8 @@ export default function Emails() {
           </Box>
         )}
       </Container>
+
+      <Footer />
 
       {/* Compose Dialog */}
       <Dialog

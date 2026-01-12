@@ -11,6 +11,7 @@ import {
 } from '@mui/material';
 import { LockOutlined } from '@mui/icons-material';
 import { login, storeTokens } from '~/lib/auth';
+import Footer from '~/components/Footer';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -40,14 +41,23 @@ export default function Login() {
       sx={{
         minHeight: '100vh',
         display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
+        flexDirection: 'column',
         bgcolor: 'background.default',
-        px: { xs: 2, sm: 0 },
         pb: 'env(safe-area-inset-bottom)',
       }}
     >
-      <Container maxWidth="xs" disableGutters sx={{ width: '100%' }}>
+      {/* Centered content area */}
+      <Box
+        sx={{
+          flexGrow: 1,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          px: { xs: 2, sm: 0 },
+          pb: 8,
+        }}
+      >
+        <Container maxWidth="xs" disableGutters sx={{ width: '100%' }}>
         <Box
           sx={{
             display: 'flex',
@@ -124,6 +134,9 @@ export default function Login() {
           </Button>
         </Box>
       </Container>
+      </Box>
+
+      <Footer />
     </Box>
   );
 }

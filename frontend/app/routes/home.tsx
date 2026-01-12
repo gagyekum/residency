@@ -13,6 +13,7 @@ import {
   Typography,
 } from '@mui/material';
 import AppHeader from '~/components/AppHeader';
+import Footer from '~/components/Footer';
 import { Email, Logout, NavigateNext, Home as HomeIcon } from '@mui/icons-material';
 import { getStoredTokens, clearTokens } from '~/lib/auth';
 import { getDashboard } from '~/lib/api';
@@ -66,7 +67,7 @@ export default function Home() {
   }
 
   return (
-    <Box sx={{ flexGrow: 1, bgcolor: 'background.default', minHeight: '100vh', pb: 'env(safe-area-inset-bottom)' }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', bgcolor: 'background.default', minHeight: '100vh', pb: 'env(safe-area-inset-bottom)' }}>
       <AppHeader>
         <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
           Residency
@@ -199,6 +200,8 @@ export default function Home() {
           ) : null}
         </Box>
       </Container>
+
+      <Footer />
     </Box>
   );
 }
