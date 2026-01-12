@@ -555,7 +555,7 @@ export default function Emails() {
             </IconButton>
           </Box>
         </DialogTitle>
-        <DialogContent>
+        <DialogContent sx={{ flex: isMobile ? 'none' : undefined }}>
           {formError && (
             <Alert severity="error" sx={{ mb: 2 }}>
               {formError}
@@ -585,7 +585,7 @@ export default function Emails() {
             disabled={!!progress}
           />
         </DialogContent>
-        <DialogActions sx={{ px: 3, pb: 2, justifyContent: 'space-between' }}>
+        <DialogActions sx={{ px: 3, pb: 2, pt: isMobile ? 2 : undefined, justifyContent: 'space-between' }}>
           {/* Progress status on the left */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             {isProcessing && (
@@ -652,7 +652,7 @@ export default function Emails() {
             </IconButton>
           </Box>
         </DialogTitle>
-        <DialogContent>
+        <DialogContent sx={{ flex: isMobile ? 'none' : undefined }}>
           {detailLoading ? (
             <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
               <CircularProgress />
@@ -766,7 +766,7 @@ export default function Emails() {
             </Box>
           )}
         </DialogContent>
-        <DialogActions sx={{ px: 3, pb: 2, justifyContent: 'space-between' }}>
+        <DialogActions sx={{ px: 3, pb: 2, pt: isMobile ? 2 : undefined, justifyContent: 'space-between' }}>
           {/* Retry progress on the left */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             {isRetryProcessing && (
