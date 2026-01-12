@@ -403,30 +403,32 @@ export default function Residences() {
       </AppBar>
 
       <Container maxWidth="lg" sx={{ mt: { xs: 2, sm: 4 }, mb: 4, px: { xs: 2, sm: 3 } }}>
-        {/* Search Bar */}
-        <Box component="form" onSubmit={handleSearch} sx={{ mb: 3 }}>
-          <TextField
-            size="small"
-            placeholder="Search by house #, name, or phone..."
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            sx={{ width: '100%', maxWidth: 400 }}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <Search color="action" fontSize="small" />
-                </InputAdornment>
-              ),
-              endAdornment: searchInput && (
-                <InputAdornment position="end">
-                  <IconButton size="small" onClick={handleClearSearch}>
-                    <Clear fontSize="small" />
-                  </IconButton>
-                </InputAdornment>
-              ),
-            }}
-          />
-        </Box>
+        {/* Search Bar - only show if there are residences or user is searching */}
+        {(residences.length > 0 || search) && (
+          <Box component="form" onSubmit={handleSearch} sx={{ mb: 3 }}>
+            <TextField
+              size="small"
+              placeholder="Search by house #, name, or phone..."
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              sx={{ width: '100%', maxWidth: 400 }}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Search color="action" fontSize="small" />
+                  </InputAdornment>
+                ),
+                endAdornment: searchInput && (
+                  <InputAdornment position="end">
+                    <IconButton size="small" onClick={handleClearSearch}>
+                      <Clear fontSize="small" />
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
+          </Box>
+        )}
 
         {error && (
           <Alert severity="error" sx={{ mb: 3 }}>
