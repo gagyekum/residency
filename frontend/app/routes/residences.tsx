@@ -33,6 +33,7 @@ import {
 } from '@mui/material';
 import AppHeader from '~/components/AppHeader';
 import Footer from '~/components/Footer';
+import PageLoader from '~/components/PageLoader';
 import {
   Add,
   ArrowBack,
@@ -402,7 +403,7 @@ export default function Residences() {
         </Tooltip>
       </AppHeader>
 
-      <Container maxWidth="lg" sx={{ mt: { xs: 2, sm: 4 }, mb: 4, px: { xs: 2, sm: 3 } }}>
+      <Container maxWidth="lg" sx={{ flexGrow: 1, mt: { xs: 2, sm: 4 }, mb: 4, px: { xs: 2, sm: 3 } }}>
         {/* Search Bar - only show if there are residences or user is searching */}
         {(residences.length > 0 || search) && (
           <Box component="form" onSubmit={handleSearch} sx={{ mb: 3 }}>
@@ -437,9 +438,7 @@ export default function Residences() {
         )}
 
         {loading ? (
-          <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
-            <CircularProgress />
-          </Box>
+          <PageLoader />
         ) : residences.length === 0 ? (
           <Box sx={{ textAlign: 'center', py: { xs: 6, sm: 10 } }}>
             <Home sx={{ fontSize: { xs: 48, sm: 64 }, color: 'grey.400', mb: 2 }} />

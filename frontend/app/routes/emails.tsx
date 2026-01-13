@@ -32,6 +32,7 @@ import {
 } from '@mui/material';
 import AppHeader from '~/components/AppHeader';
 import Footer from '~/components/Footer';
+import PageLoader from '~/components/PageLoader';
 import {
   ArrowBack,
   Close,
@@ -349,8 +350,8 @@ export default function Emails() {
 
   if (!user) {
     return (
-      <Box sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <CircularProgress />
+      <Box sx={{ minHeight: '100vh', display: 'flex' }}>
+        <PageLoader minHeight="100vh" />
       </Box>
     );
   }
@@ -399,7 +400,7 @@ export default function Emails() {
         </Tooltip>
       </AppHeader>
 
-      <Container maxWidth="lg" sx={{ mt: { xs: 2, sm: 4 }, px: { xs: 1, sm: 3 } }}>
+      <Container maxWidth="lg" sx={{ flexGrow: 1, mt: { xs: 2, sm: 4 }, px: { xs: 1, sm: 3 } }}>
         <Typography variant="h5" sx={{ mb: 3, fontSize: { xs: '1.25rem', sm: '1.5rem' } }}>
           Email History
         </Typography>
@@ -411,9 +412,7 @@ export default function Emails() {
         )}
 
         {loading ? (
-          <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
-            <CircularProgress />
-          </Box>
+          <PageLoader />
         ) : jobs.length === 0 ? (
           <Box sx={{ textAlign: 'center', py: { xs: 6, sm: 10 } }}>
             <MailOutline sx={{ fontSize: { xs: 48, sm: 64 }, color: 'grey.400', mb: 2 }} />

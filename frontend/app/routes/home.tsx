@@ -5,7 +5,6 @@ import {
   Button,
   Card,
   CardContent,
-  CircularProgress,
   Container,
   Grid,
   IconButton,
@@ -14,6 +13,7 @@ import {
 } from '@mui/material';
 import AppHeader from '~/components/AppHeader';
 import Footer from '~/components/Footer';
+import PageLoader from '~/components/PageLoader';
 import { Email, Logout, NavigateNext, Home as HomeIcon } from '@mui/icons-material';
 import { getStoredTokens, clearTokens } from '~/lib/auth';
 import { getDashboard } from '~/lib/api';
@@ -53,15 +53,8 @@ export default function Home() {
 
   if (loading) {
     return (
-      <Box
-        sx={{
-          minHeight: '100vh',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        <CircularProgress />
+      <Box sx={{ minHeight: '100vh', display: 'flex' }}>
+        <PageLoader minHeight="100vh" />
       </Box>
     );
   }
@@ -79,7 +72,7 @@ export default function Home() {
         </Tooltip>
       </AppHeader>
 
-      <Container maxWidth="sm" sx={{ mt: { xs: 6, sm: 10 }, px: { xs: 2, sm: 3 } }}>
+      <Container maxWidth="sm" sx={{ flexGrow: 1, mt: { xs: 6, sm: 10 }, px: { xs: 2, sm: 3 } }}>
         <Box sx={{ textAlign: 'center' }}>
           <Typography
             variant="h4"
@@ -120,9 +113,7 @@ export default function Home() {
 
           {/* Dashboard Stats */}
           {statsLoading ? (
-            <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
-              <CircularProgress size={32} />
-            </Box>
+            <PageLoader size={32} minHeight={100} />
           ) : stats ? (
             <Grid container spacing={2}>
               {/* Residences Card */}
