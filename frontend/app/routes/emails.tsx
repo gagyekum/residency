@@ -67,6 +67,7 @@ export default function Emails() {
   const navigate = useNavigate();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const [initialLoading, setInitialLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
   const [jobs, setJobs] = useState<EmailJobListItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -106,6 +107,10 @@ export default function Emails() {
       navigate('/login');
       return;
     }
+
+    // Set initial loading to false immediately after token check
+    // so the navbar can render while user data loads
+    setInitialLoading(false);
 
     const fetchUser = async () => {
       try {
@@ -348,7 +353,7 @@ export default function Emails() {
     return new Date(dateStr).toLocaleString();
   };
 
-  if (!user) {
+  if (initialLoading) {
     return (
       <Box sx={{ minHeight: '100vh', display: 'flex' }}>
         <PageLoader minHeight="100vh" />
@@ -401,10 +406,6 @@ export default function Emails() {
       </AppHeader>
 
       <Container maxWidth="lg" sx={{ flexGrow: 1, mt: { xs: 2, sm: 4 }, px: { xs: 1, sm: 3 } }}>
-        <Typography variant="h5" sx={{ mb: 3, fontSize: { xs: '1.25rem', sm: '1.5rem' } }}>
-          Email History
-        </Typography>
-
         {error && (
           <Alert severity="error" sx={{ mb: 2 }}>
             {error}
