@@ -1,6 +1,7 @@
 import logging
 import threading
 import time
+from collections import defaultdict
 
 from django.conf import settings
 from django.core.mail import send_mail
@@ -129,44 +130,60 @@ def process_sms_recipients(job_id):
         pending_recipients = list(job.sms_recipients.filter(status=SMSRecipient.Status.PENDING))
         total_recipients = len(pending_recipients)
 
-        logger.info(f"Processing SMS recipients for job {job_id}: {total_recipients} recipients")
+        # Group recipients by phone number so we only send once per unique number.
+        # Multiple residences may share the same phone number.
+        phone_to_recipients = defaultdict(list)
+        for recipient in pending_recipients:
+            phone_to_recipients[recipient.phone_number].append(recipient)
 
-        for batch_num, i in enumerate(range(0, total_recipients, batch_size)):
-            batch = pending_recipients[i:i + batch_size]
+        unique_numbers = list(phone_to_recipients.keys())
+
+        logger.info(
+            f"Processing SMS recipients for job {job_id}: "
+            f"{total_recipients} recipients, {len(unique_numbers)} unique numbers"
+        )
+
+        for batch_num, i in enumerate(range(0, len(unique_numbers), batch_size)):
+            batch_numbers = unique_numbers[i:i + batch_size]
 
             if batch_num > 0 and batch_delay > 0:
                 time.sleep(batch_delay)
 
-            for recipient in batch:
+            for phone_number in batch_numbers:
+                recipients_for_number = phone_to_recipients[phone_number]
                 try:
-                    sms_backend.send(recipient.phone_number, message)
+                    sms_backend.send(phone_number, message)
 
-                    recipient.status = SMSRecipient.Status.SENT
-                    recipient.sent_at = timezone.now()
-                    recipient.save(update_fields=['status', 'sent_at'])
+                    now = timezone.now()
+                    for recipient in recipients_for_number:
+                        recipient.status = SMSRecipient.Status.SENT
+                        recipient.sent_at = now
+                        recipient.save(update_fields=['status', 'sent_at'])
 
                     MessageJob.objects.filter(id=job_id).update(
-                        sms_sent_count=models.F('sms_sent_count') + 1,
+                        sms_sent_count=models.F('sms_sent_count') + len(recipients_for_number),
                     )
 
                 except SMSError as e:
-                    logger.error(f"Failed to send SMS to {recipient.phone_number}: {e}")
-                    recipient.status = SMSRecipient.Status.FAILED
-                    recipient.error_message = str(e)
-                    recipient.save(update_fields=['status', 'error_message'])
+                    logger.error(f"Failed to send SMS to {phone_number}: {e}")
+                    for recipient in recipients_for_number:
+                        recipient.status = SMSRecipient.Status.FAILED
+                        recipient.error_message = str(e)
+                        recipient.save(update_fields=['status', 'error_message'])
 
                     MessageJob.objects.filter(id=job_id).update(
-                        sms_failed_count=models.F('sms_failed_count') + 1,
+                        sms_failed_count=models.F('sms_failed_count') + len(recipients_for_number),
                     )
 
                 except Exception as e:
-                    logger.error(f"Unexpected error sending SMS to {recipient.phone_number}: {e}")
-                    recipient.status = SMSRecipient.Status.FAILED
-                    recipient.error_message = str(e)
-                    recipient.save(update_fields=['status', 'error_message'])
+                    logger.error(f"Unexpected error sending SMS to {phone_number}: {e}")
+                    for recipient in recipients_for_number:
+                        recipient.status = SMSRecipient.Status.FAILED
+                        recipient.error_message = str(e)
+                        recipient.save(update_fields=['status', 'error_message'])
 
                     MessageJob.objects.filter(id=job_id).update(
-                        sms_failed_count=models.F('sms_failed_count') + 1,
+                        sms_failed_count=models.F('sms_failed_count') + len(recipients_for_number),
                     )
 
             logger.info(f"Job {job_id}: Completed SMS batch {batch_num + 1}")
