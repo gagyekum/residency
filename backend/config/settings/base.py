@@ -48,7 +48,7 @@ INSTALLED_APPS = [
 
     'apps.users',
     'apps.residences',
-    'apps.emails',
+    'apps.messaging',
 ]
 
 MIDDLEWARE = [
@@ -208,3 +208,16 @@ DEFAULT_FROM_EMAIL_DISPLAY_NAME = os.environ.get('DEFAULT_FROM_EMAIL_DISPLAY_NAM
 # Email batch processing settings
 EMAIL_BATCH_SIZE = int(os.environ.get('EMAIL_BATCH_SIZE', 50))
 EMAIL_BATCH_DELAY = float(os.environ.get('EMAIL_BATCH_DELAY', 1.0))  # seconds between batches
+
+# SMS batch processing settings
+SMS_BATCH_SIZE = int(os.environ.get('SMS_BATCH_SIZE', 50))
+SMS_BATCH_DELAY = float(os.environ.get('SMS_BATCH_DELAY', 1.0))  # seconds between batches
+
+# Lineserve SMS settings (used by LineserveBackend)
+LINESERVE_API_URL = os.environ.get('LINESERVE_API_URL', '')
+LINESERVE_API_KEY = os.environ.get('LINESERVE_API_KEY', '')
+LINESERVE_SENDER_ID = os.environ.get('LINESERVE_SENDER_ID', '')
+
+# MNotify SMS settings (used by MNotifyBackend)
+MNOTIFY_API_KEY = os.environ.get('MNOTIFY_API_KEY', '')
+MNOTIFY_SENDER_ID = os.environ.get('MNOTIFY_SENDER_ID', '')

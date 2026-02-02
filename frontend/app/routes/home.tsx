@@ -14,7 +14,7 @@ import {
 import AppHeader from '~/components/AppHeader';
 import Footer from '~/components/Footer';
 import PageLoader from '~/components/PageLoader';
-import { Email, Logout, NavigateNext, Home as HomeIcon } from '@mui/icons-material';
+import { Email, Logout, NavigateNext, Home as HomeIcon, Sms, Message } from '@mui/icons-material';
 import { getStoredTokens, clearTokens } from '~/lib/auth';
 import { getDashboard } from '~/lib/api';
 import type { DashboardStats } from '~/lib/api';
@@ -103,11 +103,11 @@ export default function Home() {
             <Button
               variant="outlined"
               size="large"
-              endIcon={<Email />}
-              onClick={() => navigate('/emails')}
+              endIcon={<Message />}
+              onClick={() => navigate('/messaging')}
               sx={{ py: 1.5, px: 4 }}
             >
-              Email Messaging
+              Messaging
             </Button>
           </Box>
 
@@ -143,25 +143,33 @@ export default function Home() {
                           With Email
                         </Typography>
                       </Box>
+                      <Box sx={{ textAlign: 'center', flex: 1 }}>
+                        <Typography variant="h4" color="info.main">
+                          {stats.residences.with_phone ?? 0}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          With Phone
+                        </Typography>
+                      </Box>
                     </Box>
                   </CardContent>
                 </Card>
               </Grid>
 
-              {/* Emails Card */}
+              {/* Messaging Card */}
               <Grid size={{ xs: 12, sm: 6 }}>
                 <Card variant="outlined">
                   <CardContent>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-                      <Email color="primary" />
+                      <Message color="primary" />
                       <Typography variant="h6" component="h2">
-                        Email Campaigns
+                        Messaging
                       </Typography>
                     </Box>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                       <Box sx={{ textAlign: 'center', flex: 1 }}>
                         <Typography variant="h4" color="primary">
-                          {stats.emails.total_jobs}
+                          {stats.messaging?.total_jobs ?? stats.emails.total_jobs}
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
                           Total Jobs
@@ -169,7 +177,7 @@ export default function Home() {
                       </Box>
                       <Box sx={{ textAlign: 'center', flex: 1 }}>
                         <Typography variant="h4" color="success.main">
-                          {stats.emails.total_sent}
+                          {(stats.messaging?.email_sent ?? stats.emails.total_sent) + (stats.messaging?.sms_sent ?? 0)}
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
                           Sent
@@ -177,7 +185,7 @@ export default function Home() {
                       </Box>
                       <Box sx={{ textAlign: 'center', flex: 1 }}>
                         <Typography variant="h4" color="error.main">
-                          {stats.emails.total_failed}
+                          {(stats.messaging?.email_failed ?? stats.emails.total_failed) + (stats.messaging?.sms_failed ?? 0)}
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
                           Failed
