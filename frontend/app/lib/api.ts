@@ -183,13 +183,19 @@ export async function deleteResidence(id: number): Promise<void> {
   });
 }
 
-// Email permissions
-export const EMAIL_PERMISSIONS = {
-  view: 'emails.view_emailjob',
-  add: 'emails.add_emailjob',
+// Messaging permissions
+export const MESSAGING_PERMISSIONS = {
+  view: 'messaging.view_messagejob',
+  add: 'messaging.add_messagejob',
 } as const;
 
-// Email types
+// Legacy alias for backward compatibility
+export const EMAIL_PERMISSIONS = MESSAGING_PERMISSIONS;
+
+// Channel type
+export type Channel = 'email' | 'sms';
+
+// Email recipient type
 export interface EmailRecipient {
   id: number;
   residence: number;
@@ -201,13 +207,37 @@ export interface EmailRecipient {
   sent_at: string | null;
 }
 
-export interface EmailJob {
+// SMS recipient type
+export interface SMSRecipient {
+  id: number;
+  residence: number;
+  residence_name: string;
+  house_number: string;
+  phone_number: string;
+  status: 'pending' | 'sent' | 'failed';
+  error_message: string;
+  sent_at: string | null;
+}
+
+// Message job type (unified for email and SMS)
+export interface MessageJob {
   id: number;
   subject: string;
   body: string;
+  sms_body: string;
+  channels: Channel[];
   sender: number;
   sender_email: string;
   status: 'pending' | 'processing' | 'completed' | 'failed';
+  // Email stats
+  email_total_recipients: number;
+  email_sent_count: number;
+  email_failed_count: number;
+  // SMS stats
+  sms_total_recipients: number;
+  sms_sent_count: number;
+  sms_failed_count: number;
+  // Legacy fields
   total_recipients: number;
   sent_count: number;
   failed_count: number;
@@ -215,79 +245,150 @@ export interface EmailJob {
   created_at: string;
   started_at: string | null;
   completed_at: string | null;
+  // Progress
+  email_progress_percent: number;
+  sms_progress_percent: number;
+  overall_progress_percent: number;
   progress_percent: number;
 }
 
-export interface EmailRecipientsResponse {
+// Legacy alias
+export type EmailJob = MessageJob;
+
+export interface RecipientsResponse<T> {
   count: number;
   next: boolean;
   page: number;
-  results: EmailRecipient[];
+  results: T[];
 }
 
-export interface EmailJobListItem {
+export type EmailRecipientsResponse = RecipientsResponse<EmailRecipient>;
+export type SMSRecipientsResponse = RecipientsResponse<SMSRecipient>;
+
+export interface MessageJobListItem {
   id: number;
   subject: string;
+  channels: Channel[];
   sender_email: string;
   status: 'pending' | 'processing' | 'completed' | 'failed';
+  // Email stats
+  email_total_recipients: number;
+  email_sent_count: number;
+  email_failed_count: number;
+  // SMS stats
+  sms_total_recipients: number;
+  sms_sent_count: number;
+  sms_failed_count: number;
+  // Legacy
   total_recipients: number;
   sent_count: number;
   failed_count: number;
   created_at: string;
   completed_at: string | null;
+  // Progress
+  email_progress_percent: number;
+  sms_progress_percent: number;
+  overall_progress_percent: number;
   progress_percent: number;
 }
 
-export interface EmailJobInput {
-  subject: string;
+// Legacy alias
+export type EmailJobListItem = MessageJobListItem;
+
+export interface MessageJobInput {
+  subject?: string;
   body: string;
+  sms_body?: string;
+  channels?: Channel[];
 }
 
-export interface EmailJobStatus {
+// Legacy alias
+export type EmailJobInput = MessageJobInput;
+
+export interface MessageJobStatus {
   id: number;
   status: string;
+  channels: Channel[];
+  // Email stats
+  email_total_recipients: number;
+  email_sent_count: number;
+  email_failed_count: number;
+  email_progress_percent: number;
+  // SMS stats
+  sms_total_recipients: number;
+  sms_sent_count: number;
+  sms_failed_count: number;
+  sms_progress_percent: number;
+  // Overall
+  overall_progress_percent: number;
+  // Legacy
   total_recipients: number;
   sent_count: number;
   failed_count: number;
   progress_percent: number;
 }
 
-// Email API functions
-export async function getEmailJobs(page = 1): Promise<PaginatedResponse<EmailJobListItem>> {
-  return apiFetch<PaginatedResponse<EmailJobListItem>>(`/emails/?page=${page}`);
+// Legacy alias
+export type EmailJobStatus = MessageJobStatus;
+
+// Messaging API functions
+export async function getMessageJobs(page = 1): Promise<PaginatedResponse<MessageJobListItem>> {
+  return apiFetch<PaginatedResponse<MessageJobListItem>>(`/messaging/?page=${page}`);
 }
 
-export async function getEmailJob(id: number): Promise<EmailJob> {
-  return apiFetch<EmailJob>(`/emails/${id}/`);
+export async function getMessageJob(id: number): Promise<MessageJob> {
+  return apiFetch<MessageJob>(`/messaging/${id}/`);
 }
 
-export async function getEmailJobStatus(id: number): Promise<EmailJobStatus> {
-  return apiFetch<EmailJobStatus>(`/emails/${id}/status/`);
+export async function getMessageJobStatus(id: number): Promise<MessageJobStatus> {
+  return apiFetch<MessageJobStatus>(`/messaging/${id}/status/`);
 }
 
-export async function createEmailJob(data: EmailJobInput): Promise<EmailJob> {
-  return apiFetch<EmailJob>('/emails/', {
+export async function createMessageJob(data: MessageJobInput): Promise<MessageJob> {
+  return apiFetch<MessageJob>('/messaging/', {
     method: 'POST',
     body: JSON.stringify(data),
   });
 }
 
-export async function getEmailJobRecipients(jobId: number, page = 1): Promise<EmailRecipientsResponse> {
-  return apiFetch<EmailRecipientsResponse>(`/emails/${jobId}/recipients/?page=${page}`);
+export async function getMessageJobEmailRecipients(jobId: number, page = 1): Promise<EmailRecipientsResponse> {
+  return apiFetch<EmailRecipientsResponse>(`/messaging/${jobId}/email-recipients/?page=${page}`);
 }
 
-export async function retryEmailJob(jobId: number): Promise<EmailJobStatus> {
-  return apiFetch<EmailJobStatus>(`/emails/${jobId}/retry/`, {
+export async function getMessageJobSMSRecipients(jobId: number, page = 1): Promise<SMSRecipientsResponse> {
+  return apiFetch<SMSRecipientsResponse>(`/messaging/${jobId}/sms-recipients/?page=${page}`);
+}
+
+export async function retryMessageJob(jobId: number): Promise<MessageJobStatus> {
+  return apiFetch<MessageJobStatus>(`/messaging/${jobId}/retry/`, {
     method: 'POST',
   });
 }
+
+// Legacy aliases for backward compatibility
+export const getEmailJobs = getMessageJobs;
+export const getEmailJob = getMessageJob;
+export const getEmailJobStatus = getMessageJobStatus;
+export const createEmailJob = createMessageJob;
+export const getEmailJobRecipients = getMessageJobEmailRecipients;
+export const retryEmailJob = retryMessageJob;
 
 // Dashboard types and API
 export interface DashboardStats {
   residences: {
     total: number;
     with_email: number;
+    with_phone: number;
   };
+  messaging: {
+    total_jobs: number;
+    completed_jobs: number;
+    email_sent: number;
+    email_failed: number;
+    sms_sent: number;
+    sms_failed: number;
+  };
+  // Legacy field for backward compatibility
   emails: {
     total_jobs: number;
     completed_jobs: number;

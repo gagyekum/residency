@@ -37,3 +37,6 @@ CORS_ALLOWED_ORIGINS = [
     for origin in os.environ.get('CORS_ALLOWED_ORIGINS', '').split(',')
     if origin.strip()
 ]
+
+# SMS backend for production (MNotify)
+SMS_BACKEND = 'apps.messaging.sms_backends.MNotifyBackend'

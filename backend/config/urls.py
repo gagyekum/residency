@@ -22,7 +22,9 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/v1/users/', include('apps.users.urls')),
     path('api/v1/residences/', include('apps.residences.urls')),
-    path('api/v1/emails/', include('apps.emails.urls')),
+    path('api/v1/messaging/', include('apps.messaging.urls')),
+    # Legacy endpoint for backward compatibility
+    path('api/v1/emails/', include(('apps.messaging.urls', 'messaging'), namespace='emails-legacy')),
 ]
 
 if settings.DEBUG:

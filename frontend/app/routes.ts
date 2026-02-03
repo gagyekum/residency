@@ -4,5 +4,7 @@ export default [
   index("routes/home.tsx"),
   route("login", "routes/login.tsx"),
   route("residences", "routes/residences.tsx"),
-  route("emails", "routes/emails.tsx"),
+  route("messaging", "routes/messaging.tsx"),
+  // Legacy route for backward compatibility
+  route("emails", "routes/messaging.tsx", { id: "emails-legacy" }),
 ] satisfies RouteConfig;

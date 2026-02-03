@@ -31,3 +31,6 @@ VITE_DEV_SERVER = os.environ.get('VITE_DEV_SERVER', 'http://localhost:5173')
 
 # Force console email backend in development (emails print to terminal)
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+# Force console SMS backend in development (SMS print to terminal)
+SMS_BACKEND = 'apps.messaging.sms_backends.ConsoleSMSBackend'
