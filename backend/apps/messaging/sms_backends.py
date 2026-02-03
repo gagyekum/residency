@@ -6,7 +6,6 @@ Configure the backend via the SMS_BACKEND setting.
 
 Example:
     SMS_BACKEND = 'apps.messaging.sms_backends.ConsoleSMSBackend'  # Development
-    SMS_BACKEND = 'apps.messaging.sms_backends.LineserveBackend'   # Production (Lineserve)
     SMS_BACKEND = 'apps.messaging.sms_backends.MNotifyBackend'     # Production (MNotify)
 """
 
@@ -103,77 +102,6 @@ Message ({len(message)} chars):
             'to': to,
             'message_length': len(message),
         }
-
-
-class LineserveBackend(BaseSMSBackend):
-    """
-    Lineserve SMS provider backend.
-
-    Required settings:
-        LINESERVE_API_URL: The Lineserve API endpoint
-        LINESERVE_API_KEY: Your Lineserve API key
-        LINESERVE_SENDER_ID: The sender ID to display
-    """
-
-    def __init__(self, fail_silently=False, **kwargs):
-        super().__init__(fail_silently=fail_silently, **kwargs)
-        self.api_url = getattr(settings, 'LINESERVE_API_URL', '')
-        self.api_key = getattr(settings, 'LINESERVE_API_KEY', '')
-        self.sender_id = getattr(settings, 'LINESERVE_SENDER_ID', '')
-
-        if not all([self.api_url, self.api_key, self.sender_id]):
-            logger.warning(
-                "Lineserve backend not fully configured. "
-                "Set LINESERVE_API_URL, LINESERVE_API_KEY, and LINESERVE_SENDER_ID."
-            )
-
-    def send(self, to: str, message: str, **kwargs) -> dict:
-        """
-        Send SMS via Lineserve API.
-
-        Note: Update the implementation based on Lineserve's actual API documentation.
-        """
-        import requests
-
-        if not all([self.api_url, self.api_key, self.sender_id]):
-            raise SMSError("Lineserve backend not configured. Check settings.")
-
-        try:
-            # Adjust this payload based on Lineserve's actual API spec
-            payload = {
-                'api_key': self.api_key,
-                'sender_id': self.sender_id,
-                'to': to,
-                'message': message,
-            }
-
-            response = requests.post(
-                self.api_url,
-                json=payload,
-                timeout=30,
-            )
-            response.raise_for_status()
-
-            result = response.json()
-            logger.info(f"[Lineserve] SMS sent to {to}: {result}")
-
-            return {
-                'status': 'sent',
-                'provider': 'lineserve',
-                'to': to,
-                'response': result,
-            }
-
-        except requests.RequestException as e:
-            logger.error(f"[Lineserve] Failed to send SMS to {to}: {e}")
-            if not self.fail_silently:
-                raise SMSError(f"Failed to send SMS: {e}") from e
-            return {
-                'status': 'failed',
-                'provider': 'lineserve',
-                'to': to,
-                'error': str(e),
-            }
 
 
 class MNotifyBackend(BaseSMSBackend):
