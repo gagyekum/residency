@@ -69,11 +69,20 @@ backend/
 │   │   ├── views.py    # CurrentUserView (returns user + permissions)
 │   │   ├── serializers.py
 │   │   └── urls.py     # /token/, /token/refresh/, /me/
-│   └── residences/     # Residence CRUD with permissions
-│       ├── models.py   # Residence, PhoneNumber, EmailAddress
-│       ├── views.py    # ResidenceViewSet
+│   ├── residences/     # Residence CRUD with permissions
+│   │   ├── models.py   # Residence, PhoneNumber, EmailAddress
+│   │   ├── views.py    # ResidenceViewSet
+│   │   ├── serializers.py
+│   │   ├── permissions.py  # DjangoModelPermissions
+│   │   └── urls.py
+│   └── messaging/      # Email & SMS messaging system
+│       ├── models.py   # MessageJob, EmailRecipient, SMSRecipient
+│       ├── views.py    # MessageJobViewSet with status/retry actions
 │       ├── serializers.py
-│       ├── permissions.py  # DjangoModelPermissions
+│       ├── permissions.py  # MessageJobPermissions
+│       ├── tasks.py    # Background job processing (threading)
+│       ├── sms_backends.py # Pluggable SMS backends (Console, MNotify)
+│       ├── admin.py    # Read-only admin views
 │       └── urls.py
 ├── config/
 │   ├── settings/
@@ -95,7 +104,8 @@ frontend/
 │   ├── routes/
 │   │   ├── home.tsx       # Landing page with navigation
 │   │   ├── login.tsx      # JWT login form
-│   │   └── residences.tsx # CRUD interface with permissions
+│   │   ├── residences.tsx # CRUD interface with permissions
+│   │   └── messaging.tsx  # Email/SMS compose, job list, status tracking
 │   ├── lib/
 │   │   ├── auth.ts        # Token management (store, refresh, clear)
 │   │   └── api.ts         # API client with permission handling
@@ -116,6 +126,13 @@ frontend/
 - `GET /api/v1/users/me/` - Get current user with permissions
 - `GET/POST /api/v1/residences/` - List/Create residences
 - `GET/PUT/PATCH/DELETE /api/v1/residences/{id}/` - Residence detail
+- `GET/POST /api/v1/messaging/` - List/Create message jobs
+- `GET /api/v1/messaging/{id}/` - Message job detail
+- `GET /api/v1/messaging/{id}/status/` - Lightweight polling for job progress
+- `GET /api/v1/messaging/{id}/email-recipients/` - Paginated email recipients
+- `GET /api/v1/messaging/{id}/sms-recipients/` - Paginated SMS recipients
+- `POST /api/v1/messaging/{id}/retry/` - Retry failed messages
+- Legacy alias: `/api/v1/emails/` maps to the same messaging views
 
 ### Permission System
 - Uses Django model permissions (view, add, change, delete)
@@ -125,6 +142,30 @@ frontend/
   - Edit button: requires `residences.change_residence`
   - Delete button: requires `residences.delete_residence`
 - 403 errors handled gracefully with user-friendly messages
+- Messaging permissions:
+  - Send button: requires `messaging.add_messagejob`
+  - View jobs: requires `messaging.view_messagejob`
+
+### Messaging System
+- Dual-channel messaging: Email and SMS to residence contacts
+- Creating a message job auto-discovers recipients from residence phone numbers and email addresses
+- Background processing via threading (not Celery) — jobs start immediately and process asynchronously
+- Batch processing with configurable batch size and delay between batches
+- Per-channel statistics tracking (sent/failed counts for email and SMS separately)
+- Job statuses: PENDING → PROCESSING → COMPLETED/FAILED
+- Retry support for failed recipients
+- Frontend features:
+  - Compose dialog with channel selection (Email, SMS, or both)
+  - SMS character counter and segment calculator
+  - Real-time progress polling (2-second intervals)
+  - Paginated recipient lists with status per recipient
+  - Mobile-responsive card layout / desktop table layout
+
+### SMS Backends
+- Pluggable backend system (similar to Django's email backends)
+- **ConsoleSMSBackend** — prints to terminal (used in development)
+- **MNotifyBackend** — production SMS delivery via [MNotify API](https://mnotify.com)
+- Configured via `SMS_BACKEND` setting in `base.py`
 
 ### Database
 - PostgreSQL (configured via environment variables)
@@ -180,6 +221,17 @@ DJANGO_SETTINGS_MODULE=config.settings.prod
 DATABASE_URL=postgres://user:password@host:5432/dbname
 ALLOWED_HOSTS=yourdomain.com
 CORS_ALLOWED_ORIGINS=https://yourdomain.com
+```
+
+### SMS & Email Configuration
+```
+MNOTIFY_API_KEY=your-mnotify-api-key       # MNotify SMS provider API key
+MNOTIFY_SENDER_ID=YourSenderID             # SMS sender name
+EMAIL_BATCH_SIZE=50                         # Emails per batch (default: 50)
+EMAIL_BATCH_DELAY=1.0                       # Seconds between email batches (default: 1.0)
+SMS_BATCH_SIZE=50                           # SMS messages per batch (default: 50)
+SMS_BATCH_DELAY=1.0                         # Seconds between SMS batches (default: 1.0)
+DEFAULT_FROM_EMAIL_DISPLAY_NAME=Residency Administrator  # Email "From" display name
 ```
 
 ## Production Deployment
