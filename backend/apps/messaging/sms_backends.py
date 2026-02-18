@@ -149,7 +149,18 @@ class MNotifyBackend(BaseSMSBackend):
                 headers={'Content-Type': 'application/json'},
                 timeout=30,
             )
-            response.raise_for_status()
+
+            if not response.ok:
+                try:
+                    body = response.json()
+                except Exception:
+                    body = response.text
+                logger.error(
+                    f"[MNotify] HTTP {response.status_code} sending SMS to {to}: {body}"
+                )
+                raise SMSError(
+                    f"MNotify API returned HTTP {response.status_code}: {body}"
+                )
 
             result = response.json()
 
@@ -180,7 +191,7 @@ class MNotifyBackend(BaseSMSBackend):
             }
 
         except requests.RequestException as e:
-            logger.error(f"[MNotify] Failed to send SMS to {to}: {e}")
+            logger.error(f"[MNotify] Request failed sending SMS to {to}: {e}")
             if not self.fail_silently:
                 raise SMSError(f"Failed to send SMS: {e}") from e
             return {
@@ -224,7 +235,19 @@ class MNotifyBackend(BaseSMSBackend):
                 headers={'Content-Type': 'application/json'},
                 timeout=30,
             )
-            response.raise_for_status()
+
+            if not response.ok:
+                try:
+                    body = response.json()
+                except Exception:
+                    body = response.text
+                logger.error(
+                    f"[MNotify] HTTP {response.status_code} sending bulk SMS "
+                    f"to {len(recipients)} recipients: {body}"
+                )
+                raise SMSError(
+                    f"MNotify API returned HTTP {response.status_code}: {body}"
+                )
 
             result = response.json()
 
@@ -266,7 +289,7 @@ class MNotifyBackend(BaseSMSBackend):
 
         except requests.RequestException as e:
             logger.error(
-                f"[MNotify] Failed to send bulk SMS to "
+                f"[MNotify] Request failed sending bulk SMS to "
                 f"{len(recipients)} recipients: {e}"
             )
             if not self.fail_silently:
