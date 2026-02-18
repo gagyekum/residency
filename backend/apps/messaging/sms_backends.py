@@ -159,7 +159,18 @@ class MNotifyBackend(BaseSMSBackend):
                     f"(code: {result.get('code')})"
                 )
 
-            logger.info(f"[MNotify] SMS sent to {to}: {result}")
+            summary = result.get('summary', {})
+            numbers_sent = summary.get('numbers_sent', [])
+            total_rejected = summary.get('total_rejected', 0)
+
+            if total_rejected > 0 and to not in numbers_sent:
+                logger.warning(f"[MNotify] SMS to {to} was rejected by API: {summary}")
+                raise SMSError(
+                    f"SMS to {to} was rejected by MNotify "
+                    f"(total_rejected: {total_rejected})"
+                )
+
+            logger.info(f"[MNotify] SMS sent to {to}: {summary}")
 
             return {
                 'status': 'sent',
@@ -185,6 +196,9 @@ class MNotifyBackend(BaseSMSBackend):
 
         Overrides the base implementation to use MNotify's native multi-recipient
         support instead of sending one request per recipient.
+
+        Returns per-recipient results using the API's summary.numbers_sent to
+        determine which numbers were actually delivered vs rejected.
         """
         import requests
 
@@ -220,19 +234,35 @@ class MNotifyBackend(BaseSMSBackend):
                     f"(code: {result.get('code')})"
                 )
 
+            summary = result.get('summary', {})
+            numbers_sent = set(summary.get('numbers_sent', []))
+            total_sent = summary.get('total_sent', 0)
+            total_rejected = summary.get('total_rejected', 0)
+
             logger.info(
-                f"[MNotify] Bulk SMS sent to {len(recipients)} recipients: {result}"
+                f"[MNotify] Bulk SMS to {len(recipients)} recipients: "
+                f"{total_sent} sent, {total_rejected} rejected"
             )
 
-            return [
-                {
-                    'status': 'sent',
-                    'provider': 'mnotify',
-                    'to': r,
-                    'response': result,
-                }
-                for r in recipients
-            ]
+            results = []
+            for r in recipients:
+                if r in numbers_sent:
+                    results.append({
+                        'status': 'sent',
+                        'provider': 'mnotify',
+                        'to': r,
+                        'response': result,
+                    })
+                else:
+                    logger.warning(f"[MNotify] SMS to {r} was rejected")
+                    results.append({
+                        'status': 'failed',
+                        'provider': 'mnotify',
+                        'to': r,
+                        'error': 'Number rejected by MNotify',
+                    })
+
+            return results
 
         except requests.RequestException as e:
             logger.error(
