@@ -149,42 +149,56 @@ def process_sms_recipients(job_id):
             if batch_num > 0 and batch_delay > 0:
                 time.sleep(batch_delay)
 
-            for phone_number in batch_numbers:
-                recipients_for_number = phone_to_recipients[phone_number]
-                try:
-                    sms_backend.send(phone_number, message)
+            try:
+                results = sms_backend.send_bulk(batch_numbers, message)
+            except (SMSError, Exception) as e:
+                # Entire batch failed (e.g. HTTP error, network issue)
+                logger.error(f"Bulk SMS failed for batch {batch_num + 1}: {e}")
+                error_msg = str(e)
+                for phone_number in batch_numbers:
+                    for recipient in phone_to_recipients[phone_number]:
+                        recipient.status = SMSRecipient.Status.FAILED
+                        recipient.error_message = error_msg
+                        recipient.save(update_fields=['status', 'error_message'])
 
-                    now = timezone.now()
+                failed_count = sum(len(phone_to_recipients[n]) for n in batch_numbers)
+                MessageJob.objects.filter(id=job_id).update(
+                    sms_failed_count=models.F('sms_failed_count') + failed_count,
+                )
+                logger.info(f"Job {job_id}: Completed SMS batch {batch_num + 1}")
+                continue
+
+            # Process per-number results from send_bulk
+            now = timezone.now()
+            batch_sent = 0
+            batch_failed = 0
+
+            for result in results:
+                phone_number = result['to']
+                recipients_for_number = phone_to_recipients[phone_number]
+
+                if result['status'] == 'sent':
                     for recipient in recipients_for_number:
                         recipient.status = SMSRecipient.Status.SENT
                         recipient.sent_at = now
                         recipient.save(update_fields=['status', 'sent_at'])
-
-                    MessageJob.objects.filter(id=job_id).update(
-                        sms_sent_count=models.F('sms_sent_count') + len(recipients_for_number),
-                    )
-
-                except SMSError as e:
-                    logger.error(f"Failed to send SMS to {phone_number}: {e}")
+                    batch_sent += len(recipients_for_number)
+                else:
+                    error_msg = result.get('error', 'Unknown error')
                     for recipient in recipients_for_number:
                         recipient.status = SMSRecipient.Status.FAILED
-                        recipient.error_message = str(e)
+                        recipient.error_message = error_msg
                         recipient.save(update_fields=['status', 'error_message'])
+                    batch_failed += len(recipients_for_number)
 
-                    MessageJob.objects.filter(id=job_id).update(
-                        sms_failed_count=models.F('sms_failed_count') + len(recipients_for_number),
-                    )
-
-                except Exception as e:
-                    logger.error(f"Unexpected error sending SMS to {phone_number}: {e}")
-                    for recipient in recipients_for_number:
-                        recipient.status = SMSRecipient.Status.FAILED
-                        recipient.error_message = str(e)
-                        recipient.save(update_fields=['status', 'error_message'])
-
-                    MessageJob.objects.filter(id=job_id).update(
-                        sms_failed_count=models.F('sms_failed_count') + len(recipients_for_number),
-                    )
+            if batch_sent:
+                MessageJob.objects.filter(id=job_id).update(
+                    sms_sent_count=models.F('sms_sent_count') + batch_sent,
+                )
+            if batch_failed:
+                MessageJob.objects.filter(id=job_id).update(
+                    sms_failed_count=models.F('sms_failed_count') + batch_failed,
+                )
 
             logger.info(f"Job {job_id}: Completed SMS batch {batch_num + 1}")
 
