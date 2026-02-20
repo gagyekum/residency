@@ -12,11 +12,15 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  Divider,
   Grid,
   IconButton,
+  ListItemIcon,
+  ListItemText,
+  Menu,
+  MenuItem,
   Snackbar,
   TextField,
-  Tooltip,
   Typography,
   useMediaQuery,
   useTheme,
@@ -24,7 +28,7 @@ import {
 import AppHeader from '~/components/AppHeader';
 import Footer from '~/components/Footer';
 import PageLoader from '~/components/PageLoader';
-import { Lock, Logout, NavigateNext, Home as HomeIcon, Message } from '@mui/icons-material';
+import { AccountCircle, Lock, Logout, NavigateNext, Home as HomeIcon, Message } from '@mui/icons-material';
 import { getStoredTokens, clearTokens } from '~/lib/auth';
 import { changePassword, getDashboard } from '~/lib/api';
 import type { ChangePasswordErrors, DashboardStats } from '~/lib/api';
@@ -36,6 +40,9 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [statsLoading, setStatsLoading] = useState(true);
+
+  // User menu state
+  const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null);
 
   // Change password state
   const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
@@ -118,16 +125,26 @@ export default function Home() {
         <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
           Residency
         </Typography>
-        <Tooltip title="Change Password">
-          <IconButton color="inherit" onClick={handleOpenPasswordDialog}>
-            <Lock />
-          </IconButton>
-        </Tooltip>
-        <Tooltip title="Logout">
-          <IconButton color="inherit" onClick={handleLogout}>
-            <Logout />
-          </IconButton>
-        </Tooltip>
+        <IconButton color="inherit" onClick={(e) => setMenuAnchorEl(e.currentTarget)}>
+          <AccountCircle />
+        </IconButton>
+        <Menu
+          anchorEl={menuAnchorEl}
+          open={!!menuAnchorEl}
+          onClose={() => setMenuAnchorEl(null)}
+          transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+          anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+        >
+          <MenuItem onClick={() => { setMenuAnchorEl(null); handleOpenPasswordDialog(); }}>
+            <ListItemIcon><Lock fontSize="small" /></ListItemIcon>
+            <ListItemText>Change Password</ListItemText>
+          </MenuItem>
+          <Divider />
+          <MenuItem onClick={() => { setMenuAnchorEl(null); handleLogout(); }}>
+            <ListItemIcon><Logout fontSize="small" /></ListItemIcon>
+            <ListItemText>Logout</ListItemText>
+          </MenuItem>
+        </Menu>
       </AppHeader>
 
       <Container maxWidth="sm" sx={{ flexGrow: 1, mt: { xs: 6, sm: 10 }, px: { xs: 2, sm: 3 } }}>
