@@ -8,7 +8,7 @@ from rest_framework.views import APIView
 from apps.messaging.models import MessageJob
 from apps.residences.models import Residence
 
-from .serializers import UserSerializer
+from .serializers import ChangePasswordSerializer, UserSerializer
 
 
 class CurrentUserView(APIView):
@@ -29,6 +29,26 @@ class CurrentUserView(APIView):
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ChangePasswordView(APIView):
+    """
+    Change the current user's password.
+
+    POST /api/v1/users/change-password/
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        serializer = ChangePasswordSerializer(
+            data=request.data, context={'request': request}
+        )
+        if serializer.is_valid():
+            request.user.set_password(serializer.validated_data['new_password'])
+            request.user.save()
+            return Response({'detail': 'Password changed successfully.'})
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 

@@ -1,29 +1,56 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import {
+  Alert,
   Box,
   Button,
   Card,
   CardContent,
+  CircularProgress,
   Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
   Grid,
   IconButton,
-  Tooltip,
+  ListItemIcon,
+  ListItemText,
+  Menu,
+  MenuItem,
+  Snackbar,
+  TextField,
   Typography,
+  useMediaQuery,
+  useTheme,
 } from '@mui/material';
 import AppHeader from '~/components/AppHeader';
 import Footer from '~/components/Footer';
 import PageLoader from '~/components/PageLoader';
-import { Email, Logout, NavigateNext, Home as HomeIcon, Sms, Message } from '@mui/icons-material';
+import { AccountCircle, Lock, Logout, NavigateNext, Home as HomeIcon, Message } from '@mui/icons-material';
 import { getStoredTokens, clearTokens } from '~/lib/auth';
-import { getDashboard } from '~/lib/api';
-import type { DashboardStats } from '~/lib/api';
+import { changePassword, getDashboard } from '~/lib/api';
+import type { ChangePasswordErrors, DashboardStats } from '~/lib/api';
 
 export default function Home() {
   const navigate = useNavigate();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [statsLoading, setStatsLoading] = useState(true);
+
+  // User menu state
+  const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null);
+
+  // Change password state
+  const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
+  const [passwordForm, setPasswordForm] = useState({ old_password: '', new_password: '', confirm_new_password: '' });
+  const [passwordErrors, setPasswordErrors] = useState<ChangePasswordErrors>({});
+  const [passwordLoading, setPasswordLoading] = useState(false);
+  const [passwordGenericError, setPasswordGenericError] = useState('');
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
 
   useEffect(() => {
     const tokens = getStoredTokens();
@@ -51,6 +78,39 @@ export default function Home() {
     navigate('/login');
   };
 
+  const handleOpenPasswordDialog = () => {
+    setPasswordForm({ old_password: '', new_password: '', confirm_new_password: '' });
+    setPasswordErrors({});
+    setPasswordGenericError('');
+    setPasswordDialogOpen(true);
+  };
+
+  const handleClosePasswordDialog = () => {
+    setPasswordDialogOpen(false);
+  };
+
+  const handlePasswordChange = async () => {
+    setPasswordLoading(true);
+    setPasswordErrors({});
+    setPasswordGenericError('');
+    try {
+      await changePassword(passwordForm);
+      setPasswordDialogOpen(false);
+      setSnackbarOpen(true);
+    } catch (err: any) {
+      if (err.fieldErrors) {
+        setPasswordErrors(err.fieldErrors);
+        if (err.fieldErrors.non_field_errors) {
+          setPasswordGenericError(err.fieldErrors.non_field_errors.join(' '));
+        }
+      } else {
+        setPasswordGenericError(err.message || 'Failed to change password.');
+      }
+    } finally {
+      setPasswordLoading(false);
+    }
+  };
+
   if (loading) {
     return (
       <Box sx={{ minHeight: '100vh', display: 'flex' }}>
@@ -65,11 +125,26 @@ export default function Home() {
         <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
           Residency
         </Typography>
-        <Tooltip title="Logout">
-          <IconButton color="inherit" onClick={handleLogout}>
-            <Logout />
-          </IconButton>
-        </Tooltip>
+        <IconButton color="inherit" onClick={(e) => setMenuAnchorEl(e.currentTarget)}>
+          <AccountCircle />
+        </IconButton>
+        <Menu
+          anchorEl={menuAnchorEl}
+          open={!!menuAnchorEl}
+          onClose={() => setMenuAnchorEl(null)}
+          transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+          anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+        >
+          <MenuItem onClick={() => { setMenuAnchorEl(null); handleOpenPasswordDialog(); }}>
+            <ListItemIcon><Lock fontSize="small" /></ListItemIcon>
+            <ListItemText>Change Password</ListItemText>
+          </MenuItem>
+          <Divider />
+          <MenuItem onClick={() => { setMenuAnchorEl(null); handleLogout(); }}>
+            <ListItemIcon><Logout fontSize="small" /></ListItemIcon>
+            <ListItemText>Logout</ListItemText>
+          </MenuItem>
+        </Menu>
       </AppHeader>
 
       <Container maxWidth="sm" sx={{ flexGrow: 1, mt: { xs: 6, sm: 10 }, px: { xs: 2, sm: 3 } }}>
@@ -201,6 +276,72 @@ export default function Home() {
       </Container>
 
       <Footer />
+
+      {/* Change Password Dialog */}
+      <Dialog
+        open={passwordDialogOpen}
+        onClose={handleClosePasswordDialog}
+        fullScreen={isMobile}
+        fullWidth
+        maxWidth="xs"
+      >
+        <DialogTitle>Change Password</DialogTitle>
+        <DialogContent>
+          {passwordGenericError && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {passwordGenericError}
+            </Alert>
+          )}
+          <TextField
+            label="Current Password"
+            type="password"
+            fullWidth
+            margin="normal"
+            value={passwordForm.old_password}
+            onChange={(e) => setPasswordForm({ ...passwordForm, old_password: e.target.value })}
+            error={!!passwordErrors.old_password}
+            helperText={passwordErrors.old_password?.[0]}
+          />
+          <TextField
+            label="New Password"
+            type="password"
+            fullWidth
+            margin="normal"
+            value={passwordForm.new_password}
+            onChange={(e) => setPasswordForm({ ...passwordForm, new_password: e.target.value })}
+            error={!!passwordErrors.new_password}
+            helperText={passwordErrors.new_password?.[0]}
+          />
+          <TextField
+            label="Confirm New Password"
+            type="password"
+            fullWidth
+            margin="normal"
+            value={passwordForm.confirm_new_password}
+            onChange={(e) => setPasswordForm({ ...passwordForm, confirm_new_password: e.target.value })}
+            error={!!passwordErrors.confirm_new_password}
+            helperText={passwordErrors.confirm_new_password?.[0]}
+          />
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button onClick={handleClosePasswordDialog}>Cancel</Button>
+          <Button
+            variant="contained"
+            onClick={handlePasswordChange}
+            disabled={passwordLoading || !passwordForm.old_password || !passwordForm.new_password || !passwordForm.confirm_new_password}
+          >
+            {passwordLoading ? <CircularProgress size={24} /> : 'Change Password'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Success Snackbar */}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={4000}
+        onClose={() => setSnackbarOpen(false)}
+        message="Password changed successfully"
+      />
     </Box>
   );
 }

@@ -21,20 +21,7 @@ export default function Footer() {
       }}
     >
       <Typography variant="body2" color="text.secondary">
-        &copy; {currentYear} Agyekum Software Solutions
-      </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-        <Link href="mailto:gide2005@gmail.com" color="inherit" underline="hover">
-          gide2005@gmail.com
-        </Link>
-        {' | '}
-        <Link href="tel:+233242152408" color="inherit" underline="hover">
-          +233 24 215 2408
-        </Link>
-        {' / '}
-        <Link href="tel:+233548427946" color="inherit" underline="hover">
-          +233 54 842 7946
-        </Link>
+        &copy; {currentYear} High-End Cluster
       </Typography>
     </Box>
   );
