@@ -400,3 +400,45 @@ export interface DashboardStats {
 export async function getDashboard(): Promise<DashboardStats> {
   return apiFetch<DashboardStats>('/users/dashboard/');
 }
+
+// Change password
+export interface ChangePasswordInput {
+  old_password: string;
+  new_password: string;
+  confirm_new_password: string;
+}
+
+export interface ChangePasswordErrors {
+  old_password?: string[];
+  new_password?: string[];
+  confirm_new_password?: string[];
+  non_field_errors?: string[];
+}
+
+export async function changePassword(data: ChangePasswordInput): Promise<{ detail: string }> {
+  const token = await getValidToken();
+  if (!token) throw new Error('Not authenticated');
+
+  const response = await fetch(`${getApiUrl()}/users/change-password/`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (response.ok) {
+    return response.json();
+  }
+
+  if (response.status === 401) {
+    clearTokens();
+    throw new Error('Not authenticated');
+  }
+
+  const errors = await response.json().catch(() => ({}));
+  const fieldError = new Error('Validation failed');
+  (fieldError as any).fieldErrors = errors as ChangePasswordErrors;
+  throw fieldError;
+}
